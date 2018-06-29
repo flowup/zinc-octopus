@@ -1,0 +1,8 @@
+<div class="game-area">
+  <div *ngFor="let cell of cells$ | async"
+       class="game-cell"
+       [style.left.%]="cell.x * 100"
+       [style.top.%]="cell.y * 100">
+    <div class="game-cell-label">{{cell.weight}}</div>
+  </div>
+</div>
