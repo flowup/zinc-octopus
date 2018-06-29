@@ -16,6 +16,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  user-select: none;
 
   &.game-cell-mine {
     background-color: $theme-color-5;

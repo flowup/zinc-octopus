@@ -2,21 +2,24 @@
   <div *ngFor="let cell of myCells$ | async"
        class="game-cell game-cell-mine"
        [style.left.%]="cell.x * 100"
-       [style.top.%]="cell.y * 100">
+       [style.top.%]="cell.y * 100"
+       (click)="sendTransfer(cell, 'mine')">
     <div class="game-cell-label">{{cell.weight}}</div>
   </div>
 
   <div *ngFor="let cell of theirCells$ | async"
        class="game-cell game-cell-theirs"
        [style.left.%]="cell.x * 100"
-       [style.top.%]="cell.y * 100">
+       [style.top.%]="cell.y * 100"
+       (click)="sendTransfer(cell, 'theirs')">
     <div class="game-cell-label">{{cell.weight}}</div>
   </div>
 
   <div *ngFor="let cell of neutralCells$ | async"
        class="game-cell game-cell-neutral"
        [style.left.%]="cell.x * 100"
-       [style.top.%]="cell.y * 100">
+       [style.top.%]="cell.y * 100"
+       (click)="sendTransfer(cell, 'neutral')">
     <div class="game-cell-label">{{cell.weight}}</div>
   </div>
 </div>
