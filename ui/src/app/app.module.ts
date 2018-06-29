@@ -11,10 +11,12 @@ import { transferReducer } from './reducers/transfer.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { Effects } from './misc/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { playerReducer } from './reducers/player.reducer';
 
 const reducers: ActionReducerMap<AppStateModel> = {
   cells: cellReducer,
   transfers: transferReducer,
+  players: playerReducer,
 };
 
 @NgModule({

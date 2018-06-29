@@ -4,16 +4,25 @@ import { AppStateModel } from '../models/app-state.model';
 
 export function cellReducer(state: CellModel[] = [], action: CellActions): CellModel[] {
   switch(action.type) {
-    case CellUpdateAction.type:
+    case CellUpdateAction.type: {
       const updatedIds = action.payload.map(cell => cell.id);
       return [
         ...state.filter(cell => !updatedIds.includes(cell.id)),
         ...action.payload
       ];
+    }
 
     default:
       return state;
   }
 }
 
-export const $cells = ({cells}: AppStateModel) => cells;
+export const $myCells = ({cells, players}: AppStateModel) => cells
+  .filter(cell => players.me != null && cell.owner === players.me.name);
+
+export const $theirCells = ({cells, players}: AppStateModel) => cells
+  .filter(cell => players.them != null && cell.owner === players.them.name);
+
+export const $neutralCells = ({cells, players}: AppStateModel) => cells
+  .filter(cell => cell.owner == null);
+
