@@ -21,9 +21,6 @@ export class TransferComponent implements OnDestroy {
   transferClass: 'transfer-mine' | 'transfer-theirs' | 'transfer-neutral';
   private cellSub: Subscription;
 
-  identifyCell = (_, cell: CellModel) => cell.id;
-  identifyTransfer = (_, transfer: TransferModel) => transfer.id;
-
   constructor(private readonly store: Store<AppStateModel>) { }
 
   ngOnDestroy(): void {

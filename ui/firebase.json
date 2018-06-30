@@ -1,0 +1,14 @@
+{
+  "hosting": {
+    "predeploy": [
+      "npm run build"
+    ],
+    "public": "dist/zinc-octopus",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

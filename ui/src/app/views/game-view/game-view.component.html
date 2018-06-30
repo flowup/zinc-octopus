@@ -4,7 +4,7 @@
        [style.left.%]="cell.x * 100"
        [style.top.%]="cell.y * 100"
        [ngClass]="{'game-cell-clickable': cell.id !== selectedCell, 'game-cell-selected': cell.id === selectedCell}"
-       (mousedown)="sendTransfer(cell, 'mine')">
+       (click)="sendTransfer(cell, 'mine')">
     <div class="game-cell-label">{{cell.weight}}</div>
   </div>
 
@@ -13,7 +13,7 @@
        [style.left.%]="cell.x * 100"
        [style.top.%]="cell.y * 100"
        [ngClass]="{'game-cell-clickable': selectedCell}"
-       (mousedown)="sendTransfer(cell, 'theirs')">
+       (click)="sendTransfer(cell, 'theirs')">
     <div class="game-cell-label">{{cell.weight}}</div>
   </div>
 
@@ -22,7 +22,7 @@
        [style.left.%]="cell.x * 100"
        [style.top.%]="cell.y * 100"
        [ngClass]="{'game-cell-clickable': selectedCell}"
-       (mousedown)="sendTransfer(cell, 'neutral')">
+       (click)="sendTransfer(cell, 'neutral')">
     <div class="game-cell-label">{{cell.weight}}</div>
   </div>
 
