@@ -6,6 +6,7 @@ import { map, switchMap, tap } from 'rxjs/internal/operators';
 import { CellUpdateAction, InitializeAction, JoinAction, PlayerUpdateAction, SendTransferAction, TransferUpdateAction } from './actions';
 import * as io from 'socket.io-client';
 import { Actions } from '@ngrx/effects';
+import { environment } from '../../environments/environment';
 
 const enum SocketEvent {
   // incoming
@@ -17,8 +18,6 @@ const enum SocketEvent {
   Join = 'join',
   Transfer = 'transfer',
 }
-
-const SOCKET_URL = 'http://172.16.27.115:8888';
 
 @Injectable()
 export class Effects {
@@ -46,7 +45,7 @@ export class Effects {
       switchMap(({payload}: SendTransferAction) => this.emitEvent(SocketEvent.Transfer, payload))
     );
 
-  private socket = io(SOCKET_URL);
+  private socket = io(environment.socketUrl);
 
   constructor(private readonly actions$: Actions) { }
 

@@ -16,10 +16,13 @@ import { $transfers } from '../../reducers/transfer.reducer';
 export class GameViewComponent {
   selectedCell: string | null = null;
 
-  private readonly myCells$: Observable<CellModel[]>;
-  private readonly theirCells$: Observable<CellModel[]>;
-  private readonly neutralCells$: Observable<CellModel[]>;
-  private readonly transfers$: Observable<TransferModel[]>;
+  readonly myCells$: Observable<CellModel[]>;
+  readonly theirCells$: Observable<CellModel[]>;
+  readonly neutralCells$: Observable<CellModel[]>;
+  readonly transfers$: Observable<TransferModel[]>;
+
+  identifyCell = (_, cell: CellModel) => cell.id;
+  identifyTransfer = (_, transfer: TransferModel) => transfer.id;
 
   constructor(private readonly store: Store<AppStateModel>) {
     this.myCells$ = this.store.select($myCells);
