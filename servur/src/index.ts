@@ -1,15 +1,24 @@
 import { Request, Response } from 'express'
 import * as express from 'express'
 import { Server } from 'http'
+import { createServer } from 'https'
+import { readFileSync } from 'fs'
+
 import * as io from 'socket.io'
+import * as uuid from 'uuid/v4'
 
 import { Matchmaker } from './matchmaker';
-import { Player } from './player';
+import { Player, PlayerEvent } from './player';
 import { Game } from './game';
 
+const credentials = {
+  key: readFileSync(__dirname + '/sslcert/server.key', 'utf8'),
+  cert: readFileSync(__dirname + '/sslcert/server.crt', 'utf8')
+}
 
 const app = express()
 const httpApp = new Server(app)
+const httpsApp = createServer(credentials, app)
 const sio = io(httpApp)
 
 const matchmaker = new Matchmaker()
@@ -26,14 +35,22 @@ app.get('/', (req: Request, res: Response) => {
 
 sio.on('connection', (socket) => {
   const player = new Player(socket)
-  matchmaker.enqueue(player)
+  player.id = uuid()
 
-  socket.on('disconnect', () => {
-    matchmaker.dequeue(player)
-    player.onDisconnect()
+  player.socket.on(PlayerEvent.Join, (msg) => {
+    if (!msg.name) {
+      return player.socket.emit('error', 'Please provide a name')
+    }
+
+    player.name = msg.name
+    return matchmaker.enqueue(player)
   })
 })
 
-httpApp.listen(8888, function(){
-  console.log('listening on *:8888')
+httpApp.listen(8887, function(){
+  console.log('[Server] HTTP listening on *:8887')
+})
+
+httpsApp.listen(8888, () => {
+  console.log('[Server] HTTPS listening on *:8888')
 })

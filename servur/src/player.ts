@@ -1,6 +1,8 @@
 import { Socket } from 'socket.io'
 
 export enum PlayerEvent {
+    Join = 'join',
+
     Initialize = 'initialize',
     Update = 'update',
     End = 'end',
@@ -14,7 +16,10 @@ export interface TransferPayload {
 }
 
 export class Player {
+    id: string
     name: string
+
+    authenticated = false
   
     constructor(public socket: Socket) {
     }
@@ -22,6 +27,7 @@ export class Player {
     toJSON() {
         return {
             name: this.name,
+            authenticated: this.authenticated,
         }
     }
   

@@ -1,6 +1,5 @@
 import { Player, PlayerEvent, TransferPayload } from "./player";
 import * as uuid from 'uuid/v4'
-import * as sampler from 'poisson-disc-sampler'
 
 export interface Cell {
     id: string
@@ -16,6 +15,7 @@ export interface Transfer {
     from: string
     to: string
 
+    owner: string
     weight: number
 
     start: number
@@ -29,8 +29,8 @@ export interface Map {
     neutralCells: Cell[]
 }
 
-export const Maps: Map[] = [
-    {
+export const Maps: (() => Map)[] = [
+    () => ({
         name: 'Gold Airedale',
         numberOfPlayers: 2,
         playerCells: [
@@ -51,16 +51,16 @@ export const Maps: Map[] = [
             { id: uuid(), x: 0.9, y: 0.65, weight: 50 },
             { id: uuid(), x: 0.65, y: 0.9, weight: 50 },
         ]
-    },
-    {
+    }),
+    () => ({
         name: 'The Arena',
         numberOfPlayers: 2,
         playerCells: [
-            { id: uuid(), x: 0.03, y: 0.2, weight: 100, owner: 'squid' },
-            { id: uuid(), x: 0.98, y: 0.95, weight: 100, owner: 'octopus' },
+            { id: uuid(), x: 0.03, y: 0.2, weight: 100 },
+            { id: uuid(), x: 0.98, y: 0.95, weight: 100 },
         ],
         neutralCells: []
-    }
+    })
 ]
 
 export interface GameStatistics {
@@ -68,6 +68,7 @@ export interface GameStatistics {
 }
 
 export class Game {
+    id: string = uuid()
     cells: Cell[] = []
     transfers: Transfer[] = []
 
@@ -80,17 +81,19 @@ export class Game {
     }
 
     start() {
-        console.log('Starting new game')
+        console.log(`[Game][${this.id}] Starting new game:`, JSON.stringify(this.players))
 
         this.players.forEach(p => {
             p.socket.on(PlayerEvent.Transfer, (payload: TransferPayload) => {
-                console.log('Creating new transfer by player: ', p.name, payload)
+                console.log(`[Game][${this.id}] Creating new transfer by player: `, p.name, payload)
                 this.handleTransfer(payload, p)
             })
 
             p.socket.on('disconnect', () => {
                 this.handleDisconnect(p)
             })
+
+            p.socket.emit(PlayerEvent.Initialize, {})
         })
     }
 
@@ -108,7 +111,7 @@ export class Game {
         }
 
         // ignore non-matching owners
-        if (player.name !== from.owner) {
+        if (player && player.name !== from.owner) {
             return false
         }
 
@@ -121,6 +124,7 @@ export class Game {
         this.transfers.push(<Transfer>{
             from: from.id,
             to: to.id,
+            owner: from.owner,
             weight: transferWeight,
             start: start,
             end:  start + time * 1000
@@ -143,7 +147,7 @@ export class Game {
     }
 
     end() {
-        console.log('Ending the game')
+        console.log(`[Game][${this.id}] Ending`)
 
         // TODO: calculate winner - everybody is a winner now :partyparrot:
         for (const p of this.players) {
@@ -158,17 +162,8 @@ export class Game {
 
     update() {
         for (const c of this.cells) {
-            if (!c.owner) continue
-
-            if (c.weight > 200) {
-                c.weight -= Math.floor(c.weight * 0.01)
-            } else if (c.weight > 150) {
-                c.weight += 1
-            } else if (c.weight > 50) {
-                c.weight += 2
-            } else {
-                c.weight += 1
-            }
+            if (c.owner) this.updateOwnerCell(c)
+            else this.updateNeutralCell(c)
         }
 
         for (const t of this.transfers) {
@@ -176,7 +171,7 @@ export class Game {
 
             const defense = this.cells.find(c => c.id === t.to)
 
-            const attacker = this.cells.find(c => c.id === t.from).owner
+            const attacker = t.owner
             const deffender = defense.owner
             
             // attack or add more resources if send from the same player
@@ -202,7 +197,36 @@ export class Game {
         }
     }
 
+    updateOwnerCell(c: Cell) {
+        if (c.weight > 200) {
+            c.weight -= Math.floor(c.weight * 0.01)
+        } else if (c.weight > 150) {
+            c.weight += 2
+        } else if (c.weight > 50) {
+            c.weight += 3
+        } else {
+            c.weight += 2
+        }
+    }
+
+    updateNeutralCell(c: Cell) {
+        if (c.weight > 100) {
+            this.handleTransfer({
+                from: c.id,
+                to: this.cells[Math.floor(Math.random()*this.cells.length)].id,
+            }, null)
+        } else if(Math.random() < 0.3) {
+            c.weight += 1
+        }
+    }
+
     private generateMap(): Cell[] {
-        return Maps[0].playerCells.concat(Maps[0].neutralCells)
+        const instance = Maps[0]()
+
+        for (let i = 0; i < instance.numberOfPlayers; i++) {
+            instance.playerCells[i].owner = this.players[i].name
+        }
+
+        return instance.neutralCells.concat(instance.playerCells)
     }
 }

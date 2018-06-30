@@ -5,7 +5,7 @@ export class Matchmaker extends EventEmitter {
     queue: Player[] = []
 
     enqueue(player: Player) {
-        console.log('New player enqueued')
+        console.log('[Matchmaker] enqueue:', JSON.stringify(player))
         if (this.queue.length <= 0) {
             this.queue.push(player)
             return
@@ -21,7 +21,7 @@ export class Matchmaker extends EventEmitter {
     }
 
     dequeue(player: Player) {
-        console.log('Player dequeued')
+        console.log('[Matchmaker] dequeue:', JSON.stringify(player))
         this.queue = this.queue.filter((p: Player) => p !== player)
     }
 }
