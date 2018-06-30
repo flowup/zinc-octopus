@@ -1,16 +1,22 @@
 import { TransferModel } from '../models/transfer.model';
-import { TransferActions, TransferUpdateAction } from '../misc/actions';
 import { AppStateModel } from '../models/app-state.model';
+import { DeleteTransfersAction, InitializeAction, TransferActions, UpsertTransfersAction } from '../misc/actions';
+import { IdMap, removeByIds, toIdMap } from '../misc/utils';
 
-export function transferReducer(state: TransferModel[] = [], action: TransferActions): TransferModel[] {
+export function transferReducer(state: IdMap<TransferModel> = {}, action: TransferActions): IdMap<TransferModel> {
   switch(action.type) {
-    case TransferUpdateAction.type: {
-      return action.payload;
-    }
+    case InitializeAction.type:
+      return {};
+
+    case UpsertTransfersAction.type:
+      return {...state, ...toIdMap((action as UpsertTransfersAction).payload, 'id')};
+
+    case DeleteTransfersAction.type:
+      return removeByIds(state, (action as DeleteTransfersAction).payload);
 
     default:
       return state;
   }
 }
 
-export const $transfers = ({transfers}: AppStateModel) => transfers;
+export const $transfers = ({transfers}: AppStateModel) => Object.values(transfers);

@@ -5,10 +5,9 @@ import { TransferModel } from '../../models/transfer.model';
 import { interval, Observable, Subscription } from 'rxjs/index';
 import { $cellsByIds } from '../../reducers/cell.reducer';
 import { map } from 'rxjs/internal/operators';
-import { $players } from '../../reducers/player.reducer';
 import { CellModel } from '../../models/cell.model';
 import { animationFrame } from 'rxjs/internal/scheduler/animationFrame';
-import { PlayerMapModel } from '../../models/player-map.model';
+import { $me } from '../../reducers/me.reducer';
 
 @Component({
   selector: 'zo-transfer',
@@ -33,11 +32,11 @@ export class TransferComponent implements OnDestroy {
   set transfer(transfer: TransferModel) {
     this.ngOnDestroy();
     this.cellSub = this.store
-      .select((state): [CellModel[], PlayerMapModel] => [
+      .select((state): [CellModel[], string] => [
         $cellsByIds(transfer.from, transfer.to)(state),
-        $players(state)
+        $me(state)
       ])
-      .subscribe(([cells, player]) => {
+      .subscribe(([cells, me]) => {
         const {start, end} = transfer;
         const [fromCell, toCell] = cells;
         const parameter = interval(0, animationFrame)
@@ -46,14 +45,15 @@ export class TransferComponent implements OnDestroy {
         this.transferY = parameter.pipe(map(t => fromCell.y + (toCell.y - fromCell.y) * t));
 
         switch (transfer.owner) {
-          case player.me.name:
+          case me:
             this.transferClass = 'transfer-mine';
             break;
-          case player.them.name:
-            this.transferClass = 'transfer-theirs';
+          case null:
+          case undefined:
+            this.transferClass = 'transfer-neutral';
             break;
           default:
-            this.transferClass = 'transfer-neutral';
+            this.transferClass = 'transfer-theirs';
         }
       });
   }

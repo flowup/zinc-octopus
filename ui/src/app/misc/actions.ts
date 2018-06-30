@@ -4,6 +4,7 @@ import { CellModel } from '../models/cell.model';
 import { TransferModel } from '../models/transfer.model';
 import { PlayerModel } from '../models/player.model';
 import { TransferEventModel } from '../models/transfer-event.model';
+import { InitialInfoModel } from '../models/initial-info.model';
 
 abstract class LightAction implements Action {
   private static cachedType: string;
@@ -25,14 +26,17 @@ abstract class HeavyAction<T> extends LightAction {
   }
 }
 
-export class InitializeAction extends LightAction { }
-export class CellUpdateAction extends HeavyAction<CellModel[]> { }
-export class TransferUpdateAction extends HeavyAction<TransferModel[]> { }
-export class PlayerUpdateAction extends HeavyAction<[PlayerModel[], string]> { }
+export class InitializeAction extends HeavyAction<InitialInfoModel> { }
+export class UpsertPlayersAction extends HeavyAction<PlayerModel[]> { }
+export class DeletePlayersAction extends HeavyAction<string[]> { }
+export class UpsertCellsAction extends HeavyAction<CellModel[]> { }
+export class DeleteCellsAction extends HeavyAction<string[]> { }
+export class UpsertTransfersAction extends HeavyAction<TransferModel[]> { }
+export class DeleteTransfersAction extends HeavyAction<string[]> { }
 export class JoinAction extends HeavyAction<PlayerModel> { }
 export class SendTransferAction extends HeavyAction<TransferEventModel> { }
 
-export type AppActions = InitializeAction;
-export type CellActions = CellUpdateAction;
-export type TransferActions = TransferUpdateAction;
-export type PlayerActions = PlayerUpdateAction;
+export type PlayerActions = InitializeAction | UpsertPlayersAction | DeletePlayersAction;
+export type CellActions = InitializeAction | UpsertCellsAction | DeleteCellsAction;
+export type TransferActions = InitializeAction | UpsertTransfersAction | DeleteTransfersAction;
+export type MeActions = InitializeAction;
