@@ -41,6 +41,9 @@ app.get('/', (req: Request, res: Response) => {
 sio.on('connection', (socket) => {
   const player = new Player(socket)
   player.id = uuid()
+  // attach the player to the socket
+  // TODO: refactor this
+  socket['player'] = player
 
   player.socket.on(PlayerEvent.Join, (msg) => {
     if (!msg.name) {

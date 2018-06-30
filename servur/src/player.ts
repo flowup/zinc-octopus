@@ -25,6 +25,7 @@ export class Player {
 
     toJSON() {
         return {
+            id: this.id,
             name: this.name,
             authenticated: this.authenticated,
         }

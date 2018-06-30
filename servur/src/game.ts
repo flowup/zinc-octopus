@@ -85,10 +85,18 @@ export enum GameMode {
     AI = 'gamemode.ai'
 }
 
+export enum GameStatus {
+    Initialized = 'initialized',
+    Running = 'running',
+    Ended = 'ended'
+}
+
 export class Game {
     id: string = uuid()
     cells: Cell[] = []
     transfers: Transfer[] = []
+
+    status = GameStatus.Initialized
 
     updater: NodeJS.Timer
 
@@ -100,6 +108,7 @@ export class Game {
 
     start() {
         console.log(`[Game][${this.id}] Starting new game:`, JSON.stringify(this.players))
+        this.status = GameStatus.Running
 
         this.players.forEach(p => {
             p.socket.on(PlayerEvent.Transfer, (payload: TransferPayload) => {
@@ -113,7 +122,8 @@ export class Game {
             })
 
             p.socket.emit(GameEvents.Initialize, {
-                me: p.name
+                id: p.id,
+                name: p.name
             })
 
             p.socket.emit(GameEvents.PlayersUpsert, this.players)
@@ -172,13 +182,21 @@ export class Game {
     }
 
     end() {
-        console.log(`[Game][${this.id}] Ending`)
+        // skip end ceremony if it was already emited
+        if (this.status === GameStatus.Ended) {
+            return
+        }
+
+        console.log(`[Game][${this.id}] Ending game for all`)
+        this.status = GameStatus.Ended
 
         // TODO: calculate winner - everybody is a winner now :partyparrot:
         for (const p of this.players) {
             p.socket.emit(PlayerEvent.End, {
                 winner: p.name,
             })
+            // remove disconnect listener
+            p.socket.off('disconnect', () => {})
             p.socket.disconnect()
         }
 
