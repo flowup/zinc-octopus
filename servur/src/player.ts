@@ -3,7 +3,6 @@ import { Socket } from 'socket.io'
 export enum PlayerEvent {
     Join = 'join',
 
-    Initialize = 'initialize',
     Update = 'update',
     End = 'end',
 

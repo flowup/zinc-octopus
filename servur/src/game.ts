@@ -11,6 +11,19 @@ export interface Cell {
     owner?: string
 }
 
+export enum GameEvents {
+    Initialize = 'initialize',
+
+    PlayersUpsert = 'game.players.upsert',
+    PlayersDelete = 'game.players.delete',
+
+    CellsUpsert = 'game.cells.upsert',
+    CellsDelete = 'game.cells.delete',
+
+    TransfersUpsert = 'game.transfers.upsert',
+    TransfersDelete = 'game.transfers.delete',
+}
+
 export interface Transfer {
     from: string
     to: string
@@ -93,7 +106,9 @@ export class Game {
                 this.handleDisconnect(p)
             })
 
-            p.socket.emit(PlayerEvent.Initialize, {})
+            p.socket.emit(GameEvents.Initialize, {
+                me: p.name
+            })
         })
     }
 

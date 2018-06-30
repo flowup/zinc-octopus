@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import * as express from 'express'
-import { Server } from 'http'
+import * as cors from 'cors'
 import { createServer } from 'https'
 import { readFileSync } from 'fs'
 
@@ -17,9 +17,15 @@ const credentials = {
 }
 
 const app = express()
-const httpApp = new Server(app)
+app.use(cors({
+  origin: 'https://zinc-octopus.firebaseapp.com',
+  optionsSuccessStatus: 200,
+  credentials: true,
+}))
+
 const httpsApp = createServer(credentials, app)
-const sio = io(httpApp)
+
+const sio = io(httpsApp)
 
 const matchmaker = new Matchmaker()
 matchmaker.on('match', (players) => {
@@ -29,6 +35,7 @@ matchmaker.on('match', (players) => {
   game.start()
 })
 
+app.options('/', cors())
 app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to this shit, plz use port 8888 with websocket')
 })
@@ -39,7 +46,7 @@ sio.on('connection', (socket) => {
 
   player.socket.on(PlayerEvent.Join, (msg) => {
     if (!msg.name) {
-      return player.socket.emit('error', 'Please provide a name')
+      return player.socket.emit('status', 'Please provide a name')
     }
 
     player.name = msg.name
@@ -47,10 +54,6 @@ sio.on('connection', (socket) => {
   })
 })
 
-httpApp.listen(8887, function(){
-  console.log('[Server] HTTP listening on *:8887')
-})
-
-httpsApp.listen(8888, () => {
-  console.log('[Server] HTTPS listening on *:8888')
+httpsApp.listen(process.env.PORT || 8888, () => {
+  console.log(`[Server] HTTPS listening on *:${process.env.PORT || 8888}`)
 })
