@@ -20,10 +20,10 @@ export function cellReducer(state: IdMap<CellModel> = {}, action: CellActions): 
 }
 
 export const $myCells = ({cells, me}: AppStateModel) => Object.values(cells)
-  .filter(cell => cell.owner === me);
+  .filter(cell => cell.owner === me.id);
 
 export const $theirCells = ({cells, me}: AppStateModel) => Object.values(cells)
-  .filter(cell => cell.owner != null && cell.owner !== me);
+  .filter(cell => cell.owner != null && cell.owner !== me.id);
 
 export const $neutralCells = ({cells}: AppStateModel) => Object.values(cells)
   .filter(cell => cell.owner == null);

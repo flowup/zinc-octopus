@@ -27,7 +27,8 @@ abstract class HeavyAction<T> extends LightAction {
   }
 }
 
-export class LoginAction extends HeavyAction<LoginOptionsModel> { }
+export class RequestLoginAction extends HeavyAction<LoginOptionsModel> { }
+export class ConfirmLoginAction extends LightAction { }
 export class InitializeAction extends HeavyAction<PlayerModel> { }
 export class UpsertPlayersAction extends HeavyAction<PlayerModel[]> { }
 export class DeletePlayersAction extends HeavyAction<string[]> { }
@@ -35,10 +36,10 @@ export class UpsertCellsAction extends HeavyAction<CellModel[]> { }
 export class DeleteCellsAction extends HeavyAction<string[]> { }
 export class UpsertTransfersAction extends HeavyAction<TransferModel[]> { }
 export class DeleteTransfersAction extends HeavyAction<string[]> { }
-export class JoinAction extends HeavyAction<AuthInfoModel> { }
+export class RequestJoinAction extends HeavyAction<AuthInfoModel> { }
 export class SendTransferAction extends HeavyAction<TransferEventModel> { }
 
 export type PlayerActions = InitializeAction | UpsertPlayersAction | DeletePlayersAction;
 export type CellActions = InitializeAction | UpsertCellsAction | DeleteCellsAction;
 export type TransferActions = InitializeAction | UpsertTransfersAction | DeleteTransfersAction;
-export type MeActions = InitializeAction;
+export type MeActions = ConfirmLoginAction | InitializeAction;

@@ -10,17 +10,19 @@ import { CellModel } from '../models/cell.model';
 import { TransferModel } from '../models/transfer.model';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { auth } from 'firebase';
+import { Action } from '@ngrx/store';
 import {
   DeleteCellsAction,
   DeletePlayersAction,
   DeleteTransfersAction,
   InitializeAction,
-  JoinAction,
-  LoginAction,
+  RequestLoginAction,
   SendTransferAction,
   UpsertCellsAction,
   UpsertPlayersAction,
-  UpsertTransfersAction
+  UpsertTransfersAction,
+  ConfirmLoginAction,
+  RequestJoinAction,
 } from './actions';
 
 const enum SocketEvent {
@@ -63,30 +65,33 @@ export class Effects {
     .pipe(map(transfers => new DeleteTransfersAction(transfers)));
 
   @Effect() logIn$ = this.actions$
-    .ofType(LoginAction.type)
+    .ofType(RequestLoginAction.type)
     .pipe(
-      switchMap(({payload}: LoginAction) => new Observable<JoinAction>(subscriber => {
+      switchMap(({payload}: RequestLoginAction) => new Observable<Action>(subscriber => {
         const signIn = payload.anonymous ?
           this.afAuth.auth.signInAnonymously() :
           this.afAuth.auth.signInWithPopup(new auth.GoogleAuthProvider());
         signIn.then(() => {
           this.afAuth.idToken
             .pipe(take(1))
-            .subscribe(idToken => subscriber.next(new JoinAction({idToken})));
+            .subscribe(idToken => {
+              subscriber.next(new ConfirmLoginAction());
+              subscriber.next(new RequestJoinAction({idToken}));
+            });
         });
       }))
     );
 
   @Effect({dispatch: false}) join$ = this.actions$
-    .ofType(JoinAction.type)
+    .ofType(RequestJoinAction.type)
     .pipe(
-      switchMap(({payload}: JoinAction) => this.emitEvent(SocketEvent.Join, payload))
+      tap(({payload}: RequestJoinAction) => this.socket.emit(SocketEvent.Join, payload))
     );
 
   @Effect({dispatch: false}) sendTransfer$ = this.actions$
     .ofType(SendTransferAction.type)
     .pipe(
-      switchMap(({payload}: SendTransferAction) => this.emitEvent(SocketEvent.Transfer, payload))
+      tap(({payload}: SendTransferAction) => this.socket.emit(SocketEvent.Transfer, payload))
     );
 
   private socket = io(environment.socketUrl);
@@ -97,12 +102,6 @@ export class Effects {
   private observeEvent<T>(eventType: SocketEvent): Observable<T> {
     return new Observable(subscriber => {
       this.socket.on(eventType, data => subscriber.next(data));
-    });
-  }
-
-  private emitEvent<T>(eventType: SocketEvent, data: T): Observable<void> {
-    return new Observable(subscriber => {
-      this.socket.emit(eventType, data, () => subscriber.next());
     });
   }
 }
