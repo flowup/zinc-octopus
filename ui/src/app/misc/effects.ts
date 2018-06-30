@@ -13,7 +13,7 @@ const enum SocketEvent {
   End = 'end',
 }
 
-const SOCKET_URL = 'http://localhost:8888';
+const SOCKET_URL = 'http://172.16.27.115:8888';
 
 @Injectable()
 export class Effects {

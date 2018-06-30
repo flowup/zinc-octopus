@@ -1,8 +1,9 @@
-<div class="game-area">
+<div class="game-area" [ngClass]="{'game-are-after-select': selectedCell}">
   <div *ngFor="let cell of myCells$ | async"
        class="game-cell game-cell-mine"
        [style.left.%]="cell.x * 100"
        [style.top.%]="cell.y * 100"
+       [ngClass]="{'game-cell-clickable': cell.id !== selectedCell, 'game-cell-selected': cell.id === selectedCell}"
        (click)="sendTransfer(cell, 'mine')">
     <div class="game-cell-label">{{cell.weight}}</div>
   </div>
@@ -11,6 +12,7 @@
        class="game-cell game-cell-theirs"
        [style.left.%]="cell.x * 100"
        [style.top.%]="cell.y * 100"
+       [ngClass]="{'game-cell-clickable': selectedCell}"
        (click)="sendTransfer(cell, 'theirs')">
     <div class="game-cell-label">{{cell.weight}}</div>
   </div>
@@ -19,6 +21,7 @@
        class="game-cell game-cell-neutral"
        [style.left.%]="cell.x * 100"
        [style.top.%]="cell.y * 100"
+       [ngClass]="{'game-cell-clickable': selectedCell}"
        (click)="sendTransfer(cell, 'neutral')">
     <div class="game-cell-label">{{cell.weight}}</div>
   </div>
