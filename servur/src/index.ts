@@ -7,9 +7,18 @@ import { readFileSync } from 'fs'
 import * as io from 'socket.io'
 import * as uuid from 'uuid/v4'
 
+import { initializeApp, credential } from 'firebase-admin'
+
 import { Matchmaker } from './matchmaker';
 import { Player, PlayerEvent } from './player';
 import { Game } from './game';
+
+const fbServiceAccount = require('./service_accounts/firebase.json')
+
+// initialize firebase app
+initializeApp({
+  credential: credential.cert(fbServiceAccount),
+})
 
 const credentials = {
   key: readFileSync(__dirname + '/sslcert/server.key', 'utf8'),

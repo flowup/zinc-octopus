@@ -269,7 +269,7 @@ export class Game {
         const instance = Maps[0]()
 
         for (let i = 0; i < instance.numberOfPlayers; i++) {
-            instance.playerCells[i].owner = this.players[i].name
+            instance.playerCells[i].owner = this.players[i].id
         }
 
         return instance.neutralCells.concat(instance.playerCells)
