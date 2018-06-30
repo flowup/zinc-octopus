@@ -1,18 +1,36 @@
 import { Injectable } from '@angular/core';
 import { Effect } from '@ngrx/effects';
-import { UpdateEventModel } from '../models/update-event.model';
-import { Observable, of } from 'rxjs/index';
-import { map, switchMap, tap } from 'rxjs/internal/operators';
-import { CellUpdateAction, InitializeAction, JoinAction, PlayerUpdateAction, SendTransferAction, TransferUpdateAction } from './actions';
+import { Observable } from 'rxjs/index';
+import { map, switchMap } from 'rxjs/internal/operators';
 import * as io from 'socket.io-client';
 import { Actions } from '@ngrx/effects';
 import { environment } from '../../environments/environment';
+import { PlayerModel } from '../models/player.model';
+import { CellModel } from '../models/cell.model';
+import { TransferModel } from '../models/transfer.model';
+import {
+  DeleteCellsAction,
+  DeletePlayersAction,
+  DeleteTransfersAction,
+  InitializeAction,
+  JoinAction,
+  SendTransferAction,
+  UpsertCellsAction,
+  UpsertPlayersAction,
+  UpsertTransfersAction
+} from './actions';
+import { InitialInfoModel } from '../models/initial-info.model';
 
 const enum SocketEvent {
   // incoming
   Initialize = 'initialize',
-  Update = 'update',
   End = 'end',
+  UpsertPlayers = 'game.players.upsert',
+  DeletePlayers = 'game.players.delete',
+  UpsertCells = 'game.cells.upsert',
+  DeleteCells = 'game.cells.delete',
+  UpsertTransfers = 'game.transfers.upsert',
+  DeleteTransfers = 'game.transfers.delete',
 
   //outgoing
   Join = 'join',
@@ -21,17 +39,26 @@ const enum SocketEvent {
 
 @Injectable()
 export class Effects {
-  @Effect() initialize$ = this.observeEvent(SocketEvent.Initialize)
-    .pipe(map(() => new InitializeAction()));
+  @Effect() initialize$ = this.observeEvent<InitialInfoModel>(SocketEvent.Initialize)
+    .pipe(map(info => new InitializeAction(info)));
 
-  @Effect() update$ = this.observeEvent<UpdateEventModel>(SocketEvent.Update)
-    .pipe(
-      switchMap(({cells, transfers, players, me}) => of(
-        new CellUpdateAction(cells),
-        new TransferUpdateAction(transfers),
-        new PlayerUpdateAction([players, me])
-      ))
-    );
+  @Effect() upsertPlayers$ = this.observeEvent<PlayerModel[]>(SocketEvent.UpsertPlayers)
+    .pipe(map(players => new UpsertPlayersAction(players)));
+
+  @Effect() deletePlayers$ = this.observeEvent<string[]>(SocketEvent.DeletePlayers)
+    .pipe(map(players => new DeletePlayersAction(players)));
+
+  @Effect() upsertCells$ = this.observeEvent<CellModel[]>(SocketEvent.UpsertCells)
+    .pipe(map(cells => new UpsertCellsAction(cells)));
+
+  @Effect() deleteCells$ = this.observeEvent<string[]>(SocketEvent.DeleteCells)
+    .pipe(map(cells => new DeleteCellsAction(cells)));
+
+  @Effect() upsertTransfers$ = this.observeEvent<TransferModel[]>(SocketEvent.UpsertTransfers)
+    .pipe(map(transfers => new UpsertTransfersAction(transfers)));
+
+  @Effect() deleteTransfers$ = this.observeEvent<string[]>(SocketEvent.DeleteTransfers)
+    .pipe(map(transfers => new DeleteTransfersAction(transfers)));
 
   @Effect({dispatch: false}) join$ = this.actions$
     .ofType(JoinAction.type)

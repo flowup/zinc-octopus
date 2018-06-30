@@ -1,25 +1,19 @@
-import { PlayerActions, PlayerUpdateAction } from '../misc/actions';
-import { PlayerMapModel } from '../models/player-map.model';
-import { AppStateModel } from '../models/app-state.model';
+import { DeletePlayersAction, InitializeAction, PlayerActions, UpsertPlayersAction } from '../misc/actions';
+import { IdMap, removeByIds, toIdMap } from '../misc/utils';
+import { PlayerModel } from '../models/player.model';
 
-const INITIAL_STATE = {
-  me: null,
-  them: null
-};
-
-export function playerReducer(state: PlayerMapModel = INITIAL_STATE, action: PlayerActions): PlayerMapModel {
+export function playerReducer(state: IdMap<PlayerModel> = {}, action: PlayerActions): IdMap<PlayerModel> {
   switch(action.type) {
-    case PlayerUpdateAction.type: {
-      const [players, me] = action.payload;
-      return {
-        me: players.find(player => player.name === me) || state.me,
-        them: players.find(player => player.name !== me) || state.me,
-      };
-    }
+    case InitializeAction.type:
+      return {};
+
+    case UpsertPlayersAction.type:
+      return {...state, ...toIdMap((action as UpsertPlayersAction).payload, 'name')};
+
+    case DeletePlayersAction.type:
+      return removeByIds(state, (action as DeletePlayersAction).payload);
 
     default:
       return state;
   }
 }
-
-export const $players = ({players}: AppStateModel) => players;

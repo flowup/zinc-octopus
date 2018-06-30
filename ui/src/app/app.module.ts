@@ -13,12 +13,13 @@ import { Effects } from './misc/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { playerReducer } from './reducers/player.reducer';
 import { TransferComponent } from './components/transfer/transfer.component';
-import { appReducer } from './reducers/app.reducer';
+import { meReducer } from './reducers/me.reducer';
 
 const reducers: ActionReducerMap<AppStateModel> = {
+  players: playerReducer,
   cells: cellReducer,
   transfers: transferReducer,
-  players: playerReducer,
+  me: meReducer,
 };
 
 @NgModule({
@@ -30,7 +31,7 @@ const reducers: ActionReducerMap<AppStateModel> = {
   imports: [
     BrowserModule,
     AppRoutingModule,
-    StoreModule.forRoot(reducers, {metaReducers: [appReducer]}),
+    StoreModule.forRoot(reducers),
     EffectsModule.forRoot([Effects]),
     StoreDevtoolsModule.instrument({maxAge: 10}),
   ],
