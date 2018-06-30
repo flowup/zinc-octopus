@@ -7,6 +7,7 @@ import * as faker from 'faker'
 import { Matchmaker } from './matchmaker';
 import { Player, PlayerEvent } from './player';
 import { Game } from './game';
+import { Players } from './player_store';
 
 export interface PlayerJoinPayload {
     idToken: string
@@ -28,16 +29,15 @@ export class Lobby {
 
     handleConnection(socket: Socket) {
         const player = new Player(socket)
-        // attach the player to the socket
-        // TODO: refactor this
-        socket['player'] = player
+        Players.add(player)
 
-        player.socket.on(PlayerEvent.Join, async (msg) => {
-            this.handlePlayerJoined(msg, player)
+        player.socket.on(PlayerEvent.Join, this.handlePlayerJoined.bind(this, player))
+        player.socket.on('disconnect', () => {
+            Players.remove(player)
         })
     }
 
-    async handlePlayerJoined(msg: PlayerJoinPayload, player: Player) {
+    async handlePlayerJoined(player: Player, msg: PlayerJoinPayload) {
         if (!msg.idToken) {
             return player.socket.emit('status', 'Please provide your token')
         }

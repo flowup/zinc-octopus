@@ -175,7 +175,7 @@ export class Game {
     handleDisconnect(player: Player): boolean {
         this.players = this.players.filter(p => p !== player)
 
-        if (this.players.length < 2) {
+        if (this.players.length < 2 && this.players.length > 0) {
             this.end(this.players[0].id)
         }
 
@@ -277,7 +277,7 @@ export class Game {
                 acc.push(p.id)
                 return acc
             },[]),
-            winner: this.cells.find(c => c.owner !== null).owner,
+            winner: this.cells.find(c => c.owner !== null && c.owner !== undefined).owner,
             cells: this.cells
         }
 
