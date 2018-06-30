@@ -1,5 +1,6 @@
 import { PlayerActions, PlayerUpdateAction } from '../misc/actions';
 import { PlayerMapModel } from '../models/player-map.model';
+import { AppStateModel } from '../models/app-state.model';
 
 const INITIAL_STATE = {
   me: null,
@@ -20,3 +21,5 @@ export function playerReducer(state: PlayerMapModel = INITIAL_STATE, action: Pla
       return state;
   }
 }
+
+export const $players = ({players}: AppStateModel) => players;

@@ -25,11 +25,14 @@ abstract class HeavyAction<T> extends LightAction {
   }
 }
 
+export class InitializeAction extends LightAction { }
 export class CellUpdateAction extends HeavyAction<CellModel[]> { }
 export class TransferUpdateAction extends HeavyAction<TransferModel[]> { }
 export class PlayerUpdateAction extends HeavyAction<[PlayerModel[], string]> { }
+export class JoinAction extends HeavyAction<PlayerModel> { }
 export class SendTransferAction extends HeavyAction<TransferEventModel> { }
 
+export type AppActions = InitializeAction;
 export type CellActions = CellUpdateAction;
 export type TransferActions = TransferUpdateAction;
 export type PlayerActions = PlayerUpdateAction;
