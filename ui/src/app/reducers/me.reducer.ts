@@ -4,7 +4,7 @@ import { AppStateModel } from '../models/app-state.model';
 export function meReducer(state: string | null, action: MeActions): string | null {
   switch (action.type) {
     case InitializeAction.type:
-      return action.payload.me;
+      return action.payload.id;
 
     default:
       return state;
@@ -12,3 +12,4 @@ export function meReducer(state: string | null, action: MeActions): string | nul
 }
 
 export const $me = ({me}: AppStateModel) => me;
+export const $meKnown = ({me}: AppStateModel) => me != null;

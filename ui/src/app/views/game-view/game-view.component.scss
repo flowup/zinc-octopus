@@ -1,46 +1,30 @@
 @import '../../../theme';
 
-$cell-size: 50px;
-
-.game-area {
-  margin: 50px auto 0 auto;
-  width: 500px;
-  height: 500px;
-  position: relative;
-}
-
-.game-cell {
-  width: $cell-size;
-  height: $cell-size;
-  border: 1px solid $theme-color-1;
-  color: $theme-color-1;
-  border-radius: 50%;
-  position: absolute;
+.game-view {
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  user-select: none;
-  cursor: default;
-  transform: translate(#{-$cell-size / 2}, #{-$cell-size / 2});
+}
 
-  &.game-cell-mine {
-    background-color: $theme-color-5;
-  }
+.game-login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
 
-  &.game-cell-theirs {
-    background-color: $theme-color-4;
-  }
+.game-login-button {
+  padding: 10px 15px;
+  border: 1px solid $theme-color-1;
+  border-radius: 10px;
+  background-color: $theme-color-4;
+  color: $theme-color-1;
+  font-size: 20px;
+  cursor: pointer;
+  outline: none;
 
-  &.game-cell-neutral {
-    background-color: $theme-color-2;
-  }
-
-  &.game-cell-clickable {
-    cursor: pointer;
-    box-shadow: 0 0 15px rgba(black, 0.5);
-  }
-
-  &.game-cell-selected {
-    opacity: 0.7;
+  &:not(:last-child) {
+    margin-bottom: 20px;
   }
 }

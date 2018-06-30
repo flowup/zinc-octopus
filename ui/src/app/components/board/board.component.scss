@@ -1,0 +1,45 @@
+@import '../../../theme';
+
+$cell-size: 50px;
+
+.board {
+  width: 500px;
+  height: 500px;
+  position: relative;
+}
+
+.board-cell {
+  width: $cell-size;
+  height: $cell-size;
+  border: 1px solid $theme-color-1;
+  color: $theme-color-1;
+  border-radius: 50%;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  cursor: default;
+  transform: translate(#{-$cell-size / 2}, #{-$cell-size / 2});
+
+  &.board-cell-mine {
+    background-color: $theme-color-5;
+  }
+
+  &.board-cell-theirs {
+    background-color: $theme-color-4;
+  }
+
+  &.board-cell-neutral {
+    background-color: $theme-color-2;
+  }
+
+  &.board-cell-clickable {
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(black, 0.5);
+  }
+
+  &.board-cell-selected {
+    opacity: 0.7;
+  }
+}

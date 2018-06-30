@@ -1,0 +1,33 @@
+<div class="board">
+  <div *ngFor="let cell of myCells$ | async; trackBy: identifyCell"
+       class="board-cell board-cell-mine"
+       [style.left.%]="cell.x * 100"
+       [style.top.%]="cell.y * 100"
+       [ngClass]="{'board-cell-clickable': cell.id !== selectedCell, 'board-cell-selected': cell.id === selectedCell}"
+       (click)="sendTransfer(cell, 'mine')">
+    <div class="board-cell-label">{{cell.weight}}</div>
+  </div>
+
+  <div *ngFor="let cell of theirCells$ | async; trackBy: identifyCell"
+       class="board-cell board-cell-theirs"
+       [style.left.%]="cell.x * 100"
+       [style.top.%]="cell.y * 100"
+       [ngClass]="{'board-cell-clickable': selectedCell}"
+       (click)="sendTransfer(cell, 'theirs')">
+    <div class="board-cell-label">{{cell.weight}}</div>
+  </div>
+
+  <div *ngFor="let cell of neutralCells$ | async; trackBy: identifyCell"
+       class="board-cell board-cell-neutral"
+       [style.left.%]="cell.x * 100"
+       [style.top.%]="cell.y * 100"
+       [ngClass]="{'board-cell-clickable': selectedCell}"
+       (click)="sendTransfer(cell, 'neutral')">
+    <div class="board-cell-label">{{cell.weight}}</div>
+  </div>
+
+  <zo-transfer
+    *ngFor="let transfer of transfers$ | async; trackBy: identifyTransfer"
+    [transfer]="transfer">
+  </zo-transfer>
+</div>

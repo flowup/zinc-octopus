@@ -14,6 +14,10 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { playerReducer } from './reducers/player.reducer';
 import { TransferComponent } from './components/transfer/transfer.component';
 import { meReducer } from './reducers/me.reducer';
+import { BoardComponent } from './components/board/board.component';
+import { AngularFireModule } from 'angularfire2';
+import { AngularFireAuthModule } from 'angularfire2/auth';
+import { environment } from '../environments/environment';
 
 const reducers: ActionReducerMap<AppStateModel> = {
   players: playerReducer,
@@ -26,7 +30,8 @@ const reducers: ActionReducerMap<AppStateModel> = {
   declarations: [
     AppComponent,
     GameViewComponent,
-    TransferComponent
+    TransferComponent,
+    BoardComponent
   ],
   imports: [
     BrowserModule,
@@ -34,6 +39,8 @@ const reducers: ActionReducerMap<AppStateModel> = {
     StoreModule.forRoot(reducers),
     EffectsModule.forRoot([Effects]),
     StoreDevtoolsModule.instrument({maxAge: 10}),
+    AngularFireModule.initializeApp(environment.firebaseConfig),
+    AngularFireAuthModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

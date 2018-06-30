@@ -8,7 +8,7 @@ export function playerReducer(state: IdMap<PlayerModel> = {}, action: PlayerActi
       return {};
 
     case UpsertPlayersAction.type:
-      return {...state, ...toIdMap((action as UpsertPlayersAction).payload, 'name')};
+      return {...state, ...toIdMap((action as UpsertPlayersAction).payload, 'id')};
 
     case DeletePlayersAction.type:
       return removeByIds(state, (action as DeletePlayersAction).payload);
