@@ -1,25 +1,27 @@
 import { Injectable } from '@angular/core';
 import { Effect } from '@ngrx/effects';
 import { Observable } from 'rxjs/index';
-import { map, switchMap } from 'rxjs/internal/operators';
+import { map, switchMap, take, tap } from 'rxjs/internal/operators';
 import * as io from 'socket.io-client';
 import { Actions } from '@ngrx/effects';
 import { environment } from '../../environments/environment';
 import { PlayerModel } from '../models/player.model';
 import { CellModel } from '../models/cell.model';
 import { TransferModel } from '../models/transfer.model';
+import { AngularFireAuth } from 'angularfire2/auth';
+import { auth } from 'firebase';
 import {
   DeleteCellsAction,
   DeletePlayersAction,
   DeleteTransfersAction,
   InitializeAction,
   JoinAction,
+  LoginAction,
   SendTransferAction,
   UpsertCellsAction,
   UpsertPlayersAction,
   UpsertTransfersAction
 } from './actions';
-import { InitialInfoModel } from '../models/initial-info.model';
 
 const enum SocketEvent {
   // incoming
@@ -39,8 +41,8 @@ const enum SocketEvent {
 
 @Injectable()
 export class Effects {
-  @Effect() initialize$ = this.observeEvent<InitialInfoModel>(SocketEvent.Initialize)
-    .pipe(map(info => new InitializeAction(info)));
+  @Effect() initialize$ = this.observeEvent<PlayerModel>(SocketEvent.Initialize)
+    .pipe(map(me => new InitializeAction(me)));
 
   @Effect() upsertPlayers$ = this.observeEvent<PlayerModel[]>(SocketEvent.UpsertPlayers)
     .pipe(map(players => new UpsertPlayersAction(players)));
@@ -60,6 +62,21 @@ export class Effects {
   @Effect() deleteTransfers$ = this.observeEvent<string[]>(SocketEvent.DeleteTransfers)
     .pipe(map(transfers => new DeleteTransfersAction(transfers)));
 
+  @Effect() logIn$ = this.actions$
+    .ofType(LoginAction.type)
+    .pipe(
+      switchMap(({payload}: LoginAction) => new Observable<JoinAction>(subscriber => {
+        const signIn = payload.anonymous ?
+          this.afAuth.auth.signInAnonymously() :
+          this.afAuth.auth.signInWithPopup(new auth.GoogleAuthProvider());
+        signIn.then(() => {
+          this.afAuth.idToken
+            .pipe(take(1))
+            .subscribe(idToken => subscriber.next(new JoinAction({idToken})));
+        });
+      }))
+    );
+
   @Effect({dispatch: false}) join$ = this.actions$
     .ofType(JoinAction.type)
     .pipe(
@@ -74,7 +91,8 @@ export class Effects {
 
   private socket = io(environment.socketUrl);
 
-  constructor(private readonly actions$: Actions) { }
+  constructor(private readonly actions$: Actions,
+              private readonly afAuth: AngularFireAuth) { }
 
   private observeEvent<T>(eventType: SocketEvent): Observable<T> {
     return new Observable(subscriber => {
