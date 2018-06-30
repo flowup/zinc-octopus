@@ -7,7 +7,7 @@ import { $cellsByIds } from '../../reducers/cell.reducer';
 import { map } from 'rxjs/internal/operators';
 import { CellModel } from '../../models/cell.model';
 import { animationFrame } from 'rxjs/internal/scheduler/animationFrame';
-import { $me } from '../../reducers/me.reducer';
+import { $meId } from '../../reducers/me.reducer';
 
 @Component({
   selector: 'zo-transfer',
@@ -34,7 +34,7 @@ export class TransferComponent implements OnDestroy {
     this.cellSub = this.store
       .select((state): [CellModel[], string] => [
         $cellsByIds(transfer.from, transfer.to)(state),
-        $me(state)
+        $meId(state)
       ])
       .subscribe(([cells, me]) => {
         const {start, end} = transfer;

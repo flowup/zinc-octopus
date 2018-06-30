@@ -1,9 +1,23 @@
-<div class="game-view">
-  <zo-board *ngIf="meKnown$ | async; else loginForm"></zo-board>
-  <ng-template #loginForm>
+<div class="game-view" [ngSwitch]="meStatus$ | async">
+  <ng-container *ngSwitchCase="MeStatus.LoggedOut">
     <div class="game-login-form">
       <button class="game-login-button" (click)="logIn()">Log in with Google</button>
       <button class="game-login-button" (click)="logIn(true)">Log in anonymously</button>
     </div>
-  </ng-template>
+  </ng-container>
+
+  <ng-container *ngSwitchCase="MeStatus.LoggedIn">
+    <div class="game-status-hint">
+      Waiting in queue
+      <span class="game-status-hint-ellipsis">
+        <span>.</span>
+        <span>.</span>
+        <span>.</span>
+      </span>
+    </div>
+  </ng-container>
+
+  <ng-container *ngSwitchCase="MeStatus.Playing">
+    <zo-board></zo-board>
+  </ng-container>
 </div>
