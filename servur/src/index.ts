@@ -29,15 +29,13 @@ const sio = io(httpsApp)
 
 const matchmaker = new Matchmaker()
 matchmaker.on('match', (players) => {
-  console.log('matched players: ', JSON.stringify(players))
-
   const game = new Game(players)
   game.start()
 })
 
 app.options('/', cors())
 app.get('/', (req: Request, res: Response) => {
-  res.send('Welcome to this shit, plz use port 8888 with websocket')
+  res.send('Please use websocket connection')
 })
 
 sio.on('connection', (socket) => {

@@ -3,12 +3,11 @@ import * as uuid from 'uuid/v4'
 
 export interface Cell {
     id: string
+    owner?: string
+    weight: number
 
     x: number
     y: number
-    weight: number
-
-    owner?: string
 }
 
 export enum GameEvents {
@@ -25,6 +24,7 @@ export enum GameEvents {
 }
 
 export interface Transfer {
+    id: string
     from: string
     to: string
 
@@ -80,6 +80,11 @@ export interface GameStatistics {
 
 }
 
+export enum GameMode {
+    Normal = 'gamemode.normal',
+    AI = 'gamemode.ai'
+}
+
 export class Game {
     id: string = uuid()
     cells: Cell[] = []
@@ -103,12 +108,16 @@ export class Game {
             })
 
             p.socket.on('disconnect', () => {
+                console.log(`[Game][${this.id}] player disconnected:`, JSON.stringify(p))
                 this.handleDisconnect(p)
             })
 
             p.socket.emit(GameEvents.Initialize, {
                 me: p.name
             })
+
+            p.socket.emit(GameEvents.PlayersUpsert, this.players)
+            p.socket.emit(GameEvents.CellsUpsert, this.cells)
         })
     }
 
@@ -137,6 +146,7 @@ export class Game {
         const transferWeight = Math.floor(from.weight / 2)
 
         this.transfers.push(<Transfer>{
+            id: uuid(),
             from: from.id,
             to: to.id,
             owner: from.owner,
@@ -181,6 +191,7 @@ export class Game {
             else this.updateNeutralCell(c)
         }
 
+        const doneTransfers = []
         for (const t of this.transfers) {
             if (Date.now() < t.end) continue
 
@@ -200,15 +211,13 @@ export class Game {
 
             // remove current transfer after it was processed
             this.transfers = this.transfers.filter(tr => tr !== t)
+            doneTransfers.push(t.id)
         }
 
         for (const p of this.players) {
-            p.socket.emit(PlayerEvent.Update, {
-                players: this.players,
-                cells: this.cells,
-                transfers: this.transfers,
-                me: p.name,
-            })
+            p.socket.emit(GameEvents.TransfersUpsert, this.transfers)
+            p.socket.emit(GameEvents.CellsUpsert, this.cells)
+            p.socket.emit(GameEvents.TransfersDelete, doneTransfers)
         }
     }
 

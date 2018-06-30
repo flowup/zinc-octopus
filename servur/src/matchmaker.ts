@@ -1,11 +1,12 @@
 import { EventEmitter } from 'events'
 import { Player } from './player';
+import { GameMode } from './game';
 
 export class Matchmaker extends EventEmitter {
     queue: Player[] = []
 
-    enqueue(player: Player) {
-        console.log('[Matchmaker] enqueue:', JSON.stringify(player))
+    enqueue(player: Player, mode: GameMode = GameMode.Normal) {
+        console.log(`[Matchmaker][${mode}] enqueue:`, JSON.stringify(player))
         if (this.queue.length <= 0) {
             this.queue.push(player)
             return
@@ -13,10 +14,7 @@ export class Matchmaker extends EventEmitter {
 
         const oponent = this.queue.shift()
 
-        // just for now
-        player.name = 'squid'
-        oponent.name = 'octopus'
-
+        console.log('[Matchmaker] matched:', JSON.stringify([player, oponent]))
         this.emit('match', [player, oponent])
     }
 
