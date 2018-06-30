@@ -17,8 +17,6 @@ export interface TransferPayload {
 export class Player {
     id: string
     name: string
-
-    authenticated = false
   
     constructor(public socket: Socket) {
     }
@@ -29,6 +27,10 @@ export class Player {
             name: this.name,
             authenticated: this.authenticated,
         }
+    }
+
+    get authenticated(): boolean {
+        return this.id !== null && this.id !== undefined && this.id !== ''
     }
   
     onDisconnect() {

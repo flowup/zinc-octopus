@@ -1,5 +1,6 @@
 import { Player, PlayerEvent, TransferPayload } from "./player";
 import * as uuid from 'uuid/v4'
+import { firestore } from "firebase-admin";
 
 export interface Cell {
     id: string
@@ -145,12 +146,12 @@ export class Game {
         }
 
         // ignore non-matching owners
-        if (player && player.name !== from.owner) {
+        if (player && player.id !== from.owner) {
             return false
         }
 
         const distance = Math.sqrt(Math.pow(from.x-to.x, 2) + Math.pow(from.y-to.y, 2))
-        const time = distance * 7 // 10% of playground in 1.5 second
+        const time = distance * 5 // 10% of playground in 1.5 second
 
         const start = Date.now()
         const transferWeight = Math.floor(from.weight / 2)
@@ -175,25 +176,25 @@ export class Game {
         this.players = this.players.filter(p => p !== player)
 
         if (this.players.length < 2) {
-            this.end()
+            this.end(this.players[0].id)
         }
 
         return true
     }
 
-    end() {
+    end(winner: string) {
         // skip end ceremony if it was already emited
         if (this.status === GameStatus.Ended) {
             return
         }
 
-        console.log(`[Game][${this.id}] Ending game for all`)
+        console.log(`[Game][${this.id}] Ending game for all:`, JSON.stringify(this.players))
         this.status = GameStatus.Ended
 
         // TODO: calculate winner - everybody is a winner now :partyparrot:
         for (const p of this.players) {
             p.socket.emit(PlayerEvent.End, {
-                winner: p.name,
+                winner,
             })
             // remove disconnect listener
             p.socket.off('disconnect', () => {})
@@ -240,6 +241,49 @@ export class Game {
                 p.socket.emit(GameEvents.TransfersDelete, doneTransfers)
             }
         }
+
+        if (this.calculateEndingCondition()) {
+            for (const p of this.players) {
+                p.socket.emit(GameEvents.TransfersDelete, this.transfers.reduce((acc, t) => {
+                    acc.push(t.id)
+                    return acc
+                }, []))
+            }
+
+            const stats = this.updateFirestoreStatistics()
+            this.end(stats.winner)
+        }
+    }
+
+    calculateEndingCondition() {
+        const stats = this.cells.reduce((acc, c) => {
+            if (!c.owner) return acc
+
+            acc[c.owner] = (acc[c.owner] || 0) + 1
+            return acc
+        }, {})
+
+        // last player standing
+        if (Object.keys(stats).length <= 1) {
+            return true
+        }
+
+        return false
+    }
+
+    updateFirestoreStatistics() {
+        const stats = {
+            players: this.players.reduce((acc, p) => {
+                acc.push(p.id)
+                return acc
+            },[]),
+            winner: this.cells.find(c => c.owner !== null).owner,
+            cells: this.cells
+        }
+
+        firestore().collection('matches').add(stats)
+
+        return stats
     }
 
     updateOwnerCell(c: Cell) {
