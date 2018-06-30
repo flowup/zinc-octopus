@@ -30,18 +30,22 @@ export class TransferComponent implements OnDestroy {
   }
 
   @Input()
-  set transfer({from, to, start, end}: TransferModel) {
+  set transfer(transfer: TransferModel) {
     this.ngOnDestroy();
     this.cellSub = this.store
-      .select((state): [CellModel[], PlayerMapModel] => [$cellsByIds(from, to)(state), $players(state)])
+      .select((state): [CellModel[], PlayerMapModel] => [
+        $cellsByIds(transfer.from, transfer.to)(state),
+        $players(state)
+      ])
       .subscribe(([cells, player]) => {
+        const {start, end} = transfer;
         const [fromCell, toCell] = cells;
         const parameter = interval(0, animationFrame)
           .pipe(map(() => Math.min(Math.max(0, (Date.now() - start) / (end - start)), 1)));
         this.transferX = parameter.pipe(map(t => fromCell.x + (toCell.x - fromCell.x) * t));
         this.transferY = parameter.pipe(map(t => fromCell.y + (toCell.y - fromCell.y) * t));
 
-        switch (fromCell.owner) {
+        switch (transfer.owner) {
           case player.me.name:
             this.transferClass = 'transfer-mine';
             break;

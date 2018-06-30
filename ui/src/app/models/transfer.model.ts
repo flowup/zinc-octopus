@@ -4,4 +4,5 @@ export interface TransferModel {
   to: string;
   start: number;
   end: number;
+  owner: string;
 }
