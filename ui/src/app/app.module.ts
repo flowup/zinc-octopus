@@ -12,6 +12,8 @@ import { EffectsModule } from '@ngrx/effects';
 import { Effects } from './misc/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { playerReducer } from './reducers/player.reducer';
+import { TransferComponent } from './components/transfer/transfer.component';
+import { appReducer } from './reducers/app.reducer';
 
 const reducers: ActionReducerMap<AppStateModel> = {
   cells: cellReducer,
@@ -22,12 +24,13 @@ const reducers: ActionReducerMap<AppStateModel> = {
 @NgModule({
   declarations: [
     AppComponent,
-    GameViewComponent
+    GameViewComponent,
+    TransferComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    StoreModule.forRoot(reducers),
+    StoreModule.forRoot(reducers, {metaReducers: [appReducer]}),
     EffectsModule.forRoot([Effects]),
     StoreDevtoolsModule.instrument({maxAge: 10}),
   ],

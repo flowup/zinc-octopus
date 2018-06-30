@@ -1,0 +1,5 @@
+<div class="transfer"
+     [ngClass]="this.transferClass"
+     [style.left.%]="(transferX | async) * 100"
+     [style.top.%]="(transferY | async) * 100">
+</div>

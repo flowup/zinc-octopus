@@ -1,22 +1,33 @@
-<div class="game-area">
-  <div *ngFor="let cell of myCells$ | async"
+<div class="game-area" [ngClass]="{'game-are-after-select': selectedCell}">
+  <div *ngFor="let cell of myCells$ | async; trackBy: identifyCell"
        class="game-cell game-cell-mine"
        [style.left.%]="cell.x * 100"
-       [style.top.%]="cell.y * 100">
+       [style.top.%]="cell.y * 100"
+       [ngClass]="{'game-cell-clickable': cell.id !== selectedCell, 'game-cell-selected': cell.id === selectedCell}"
+       (mousedown)="sendTransfer(cell, 'mine')">
     <div class="game-cell-label">{{cell.weight}}</div>
   </div>
 
-  <div *ngFor="let cell of theirCells$ | async"
+  <div *ngFor="let cell of theirCells$ | async; trackBy: identifyCell"
        class="game-cell game-cell-theirs"
        [style.left.%]="cell.x * 100"
-       [style.top.%]="cell.y * 100">
+       [style.top.%]="cell.y * 100"
+       [ngClass]="{'game-cell-clickable': selectedCell}"
+       (mousedown)="sendTransfer(cell, 'theirs')">
     <div class="game-cell-label">{{cell.weight}}</div>
   </div>
 
-  <div *ngFor="let cell of neutralCells$ | async"
+  <div *ngFor="let cell of neutralCells$ | async; trackBy: identifyCell"
        class="game-cell game-cell-neutral"
        [style.left.%]="cell.x * 100"
-       [style.top.%]="cell.y * 100">
+       [style.top.%]="cell.y * 100"
+       [ngClass]="{'game-cell-clickable': selectedCell}"
+       (mousedown)="sendTransfer(cell, 'neutral')">
     <div class="game-cell-label">{{cell.weight}}</div>
   </div>
+
+  <zo-transfer
+    *ngFor="let transfer of transfers$ | async; trackBy: identifyTransfer"
+    [transfer]="transfer">
+  </zo-transfer>
 </div>

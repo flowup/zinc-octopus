@@ -26,3 +26,5 @@ export const $theirCells = ({cells, players}: AppStateModel) => cells
 export const $neutralCells = ({cells, players}: AppStateModel) => cells
   .filter(cell => cell.owner == null);
 
+export const $cellsByIds = (...cellIds: string[]) => ({cells}: AppStateModel) => cellIds
+  .map(id => cells.find(cell => cell.id === id) || null);

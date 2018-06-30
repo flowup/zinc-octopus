@@ -1,0 +1,24 @@
+@import '../../../theme';
+
+$transfer-size: 16px;
+
+.transfer {
+  position: absolute;
+  width: $transfer-size;
+  height: $transfer-size;
+  border: 1px solid $theme-color-1;
+  border-radius: 50%;
+  transform: translate(#{-$transfer-size / 2}, #{-$transfer-size / 2});
+
+  &.transfer-mine {
+    background-color: $theme-color-5;
+  }
+
+  &.transfer-theirs {
+    background-color: $theme-color-4;
+  }
+
+  &.transfer-neutral {
+    background-color: $theme-color-2;
+  }
+}
