@@ -6,7 +6,7 @@ import { readFileSync } from 'fs'
 
 import * as io from 'socket.io'
 
-import { initializeApp, credential } from 'firebase-admin'
+import { initializeApp, credential, auth, firestore } from 'firebase-admin'
 import { Lobby } from './lobby';
 
 const fbServiceAccount = require('./service_accounts/firebase.json')
@@ -36,6 +36,21 @@ const lobby = new Lobby(sio)
 app.options('/', cors())
 app.get('/', (req: Request, res: Response) => {
   res.send('Please use websocket connection')
+})
+
+app.get('/stats', async (req: Request, res: Response) => {
+  try {
+    const token = await auth().verifyIdToken(req.header('authorization'))
+
+    const query = await firestore().collection('matches').where('winner', '==', token.uid).get()
+
+    return res.status(200).send({
+      wins: query.size
+    })
+
+  } catch (err) {
+    return res.status(400).send('An error occured: ' + err)
+  }
 })
 
 httpsApp.listen(process.env.PORT || 8888, () => {

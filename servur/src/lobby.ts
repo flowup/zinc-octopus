@@ -34,6 +34,7 @@ export class Lobby {
         player.socket.on(PlayerEvent.Join, this.handlePlayerJoined.bind(this, player))
         player.socket.on('disconnect', () => {
             Players.remove(player)
+            this.matchmaker.dequeue(player)
         })
     }
 
