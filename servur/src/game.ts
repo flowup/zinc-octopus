@@ -22,6 +22,51 @@ export interface Transfer {
     end: number
 }
 
+export interface Map {
+    name: string
+    numberOfPlayers: number,
+    playerCells: Cell[]
+    neutralCells: Cell[]
+}
+
+export const Maps: Map[] = [
+    {
+        name: 'Gold Airedale',
+        numberOfPlayers: 2,
+        playerCells: [
+            { id: uuid(), x: 0.1, y: 0.1, weight: 100, owner: 'squid' },
+            { id: uuid(), x: 0.9, y: 0.9, weight: 100, owner: 'octopus' },
+        ],
+        neutralCells: [
+            // left top
+            { id: uuid(), x: 0.35, y: 0.1, weight: 50 },
+            { id: uuid(), x: 0.35, y: 0.35, weight: 50 },
+            { id: uuid(), x: 0.1, y: 0.35, weight: 75 },
+
+            // center
+            { id: uuid(), x: 0.5, y: 0.5, weight: 50 },
+
+            // right bottom
+            { id: uuid(), x: 0.65, y: 0.65, weight: 75 },
+            { id: uuid(), x: 0.9, y: 0.65, weight: 50 },
+            { id: uuid(), x: 0.65, y: 0.9, weight: 50 },
+        ]
+    },
+    {
+        name: 'The Arena',
+        numberOfPlayers: 2,
+        playerCells: [
+            { id: uuid(), x: 0.03, y: 0.2, weight: 100, owner: 'squid' },
+            { id: uuid(), x: 0.98, y: 0.95, weight: 100, owner: 'octopus' },
+        ],
+        neutralCells: []
+    }
+]
+
+export interface GameStatistics {
+
+}
+
 export class Game {
     cells: Cell[] = []
     transfers: Transfer[] = []
@@ -29,20 +74,24 @@ export class Game {
     updater: NodeJS.Timer
 
     constructor(private players: Player[]) {
-        this.generateCells()
+        this.cells = this.generateMap()
 
-        this.updater = setInterval(this.update.bind(this), 300)
+        this.updater = setInterval(this.update.bind(this), 500)
     }
 
     start() {
         console.log('Starting new game')
 
-        for (const p of this.players) {
+        this.players.forEach(p => {
             p.socket.on(PlayerEvent.Transfer, (payload: TransferPayload) => {
                 console.log('Creating new transfer by player: ', p.name, payload)
                 this.handleTransfer(payload, p)
             })
-        }
+
+            p.socket.on('disconnect', () => {
+                this.handleDisconnect(p)
+            })
+        })
     }
 
     handleTransfer(t: TransferPayload, player: Player): boolean {
@@ -54,26 +103,41 @@ export class Game {
             return false
         }
 
+        if (from === to) {
+            return false
+        }
+
         // ignore non-matching owners
         if (player.name !== from.owner) {
             return false
         }
 
         const distance = Math.sqrt(Math.pow(from.x-to.x, 2) + Math.pow(from.y-to.y, 2))
-        const time = distance * 15 // 10% of playground in 1.5 second
+        const time = distance * 7 // 10% of playground in 1.5 second
 
         const start = Date.now()
+        const transferWeight = Math.floor(from.weight / 2)
 
         this.transfers.push(<Transfer>{
             from: from.id,
             to: to.id,
-            weight: from.weight / 2,
+            weight: transferWeight,
             start: start,
             end:  start + time * 1000
         })
 
         // decrease the weight of the cell we sent from.
-        from.weight /= 2
+        from.weight -= transferWeight
+
+        return true
+    }
+
+    handleDisconnect(player: Player): boolean {
+        this.players = this.players.filter(p => p !== player)
+
+        if (this.players.length < 2) {
+            this.end()
+        }
 
         return true
     }
@@ -86,6 +150,7 @@ export class Game {
             p.socket.emit(PlayerEvent.End, {
                 winner: p.name,
             })
+            p.socket.disconnect()
         }
 
         clearInterval(this.updater)
@@ -137,18 +202,7 @@ export class Game {
         }
     }
 
-    private generateCells() {
-        this.cells = [
-            { id: uuid(), x: 0.03, y: 0.2, weight: 100, owner: 'squid' },
-            { id: uuid(), x: 0.98, y: 0.95, weight: 100, owner: 'octopus' },
-        ]
-
-        const s = sampler(1000, 1000, 100)
-        for (let i = 0; i < 10; i++) {
-            const p = s()
-            this.cells.push({
-                id: uuid(), x: p[0]/1000, y: p[0]/1000, weight: 50
-            })
-        }
+    private generateMap(): Cell[] {
+        return Maps[0].playerCells.concat(Maps[0].neutralCells)
     }
 }
