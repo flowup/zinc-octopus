@@ -235,7 +235,10 @@ export class Game {
         for (const p of this.players) {
             p.socket.emit(GameEvents.TransfersUpsert, this.transfers)
             p.socket.emit(GameEvents.CellsUpsert, this.cells)
-            p.socket.emit(GameEvents.TransfersDelete, doneTransfers)
+
+            if (doneTransfers.length > 0) {
+                p.socket.emit(GameEvents.TransfersDelete, doneTransfers)
+            }
         }
     }
 
