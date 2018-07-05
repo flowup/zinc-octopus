@@ -1,12 +1,12 @@
-<div class="game-view" [ngSwitch]="meStatus$ | async">
-  <ng-container *ngSwitchCase="MeStatus.LoggedOut">
+<div class="game-view">
+  <ng-container *ngIf="(meStatus$ | async) === MeStatus.LoggedOut">
     <div class="game-login-form">
       <zo-button (click)="logIn()">Log in with Google</zo-button>
       <zo-button (click)="logIn(true)">Log in anonymously</zo-button>
     </div>
   </ng-container>
 
-  <ng-container *ngSwitchCase="MeStatus.LoggedIn">
+  <ng-container *ngIf="(meStatus$ | async) === MeStatus.LoggedIn">
     <div class="game-status-hint">
       Waiting in queue
       <span class="game-status-hint-ellipsis">
@@ -17,7 +17,13 @@
     </div>
   </ng-container>
 
-  <ng-container *ngSwitchCase="MeStatus.Playing">
-    <zo-board></zo-board>
+  <ng-container *ngIf="[MeStatus.Playing, MeStatus.Winner, MeStatus.Loser].includes(meStatus$ | async)">
+    <div class="game-board-container">
+      <div class="game-board-header" [ngSwitch]="meStatus$ | async">
+        <ng-container *ngSwitchCase="MeStatus.Winner">You win!</ng-container>
+        <ng-container *ngSwitchCase="MeStatus.Loser">You lose!</ng-container>
+      </div>
+      <zo-board></zo-board>
+    </div>
   </ng-container>
 </div>

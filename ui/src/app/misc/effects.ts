@@ -22,8 +22,9 @@ import {
   UpsertPlayersAction,
   UpsertTransfersAction,
   ConfirmLoginAction,
-  RequestJoinAction, RequestLogoutAction, ConfirmLogoutAction,
+  RequestJoinAction, RequestLogoutAction, ConfirmLogoutAction, EndAction,
 } from './actions';
+import { GameEndModel } from '../models/game-end.model';
 
 const enum SocketEvent {
   // incoming
@@ -45,6 +46,9 @@ const enum SocketEvent {
 export class Effects {
   @Effect() initialize$ = this.observeEvent<PlayerModel>(SocketEvent.Initialize)
     .pipe(map(me => new InitializeAction(me)));
+
+  @Effect() end$ = this.observeEvent<GameEndModel>(SocketEvent.End)
+    .pipe(map(gameEnd => new EndAction(gameEnd)));
 
   @Effect() upsertPlayers$ = this.observeEvent<PlayerModel[]>(SocketEvent.UpsertPlayers)
     .pipe(map(players => new UpsertPlayersAction(players)));

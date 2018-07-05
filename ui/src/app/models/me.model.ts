@@ -1,7 +1,9 @@
 export enum MeStatus {
   LoggedOut,
   LoggedIn,
-  Playing
+  Playing,
+  Winner,
+  Loser,
 }
 
 export interface MeModel {
