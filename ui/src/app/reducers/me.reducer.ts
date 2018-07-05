@@ -1,4 +1,4 @@
-import { ConfirmLoginAction, InitializeAction, MeActions } from '../misc/actions';
+import { ConfirmLoginAction, ConfirmLogoutAction, InitializeAction, MeActions } from '../misc/actions';
 import { AppStateModel } from '../models/app-state.model';
 import { MeModel, MeStatus } from '../models/me.model';
 
@@ -14,6 +14,9 @@ export function meReducer(state: MeModel = INITIAL_STATE, action: MeActions): Me
         ...state,
         status: MeStatus.LoggedIn
       };
+
+    case ConfirmLogoutAction.type:
+      return INITIAL_STATE;
 
     case InitializeAction.type:
       return {

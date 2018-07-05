@@ -1,0 +1,24 @@
+@import '../../../theme';
+
+.button {
+  padding: 10px 15px;
+  border: 1px solid $theme-color-1;
+  border-radius: 10px;
+  color: $theme-color-1;
+  font-size: 20px;
+  cursor: pointer;
+  outline: none;
+  transition: transform 100ms;
+
+  &.button-plain {
+    background-color: $theme-color-4;
+  }
+
+  &.button-accent {
+    background-color: $theme-color-5;
+  }
+
+  &:active {
+    transform: scale(0.9);
+  }
+}

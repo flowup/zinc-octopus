@@ -1,8 +1,8 @@
 <div class="game-view" [ngSwitch]="meStatus$ | async">
   <ng-container *ngSwitchCase="MeStatus.LoggedOut">
     <div class="game-login-form">
-      <button class="game-login-button" (click)="logIn()">Log in with Google</button>
-      <button class="game-login-button" (click)="logIn(true)">Log in anonymously</button>
+      <zo-button (click)="logIn()">Log in with Google</zo-button>
+      <zo-button (click)="logIn(true)">Log in anonymously</zo-button>
     </div>
   </ng-container>
 

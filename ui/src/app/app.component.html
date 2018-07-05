@@ -1,6 +1,10 @@
 <div class="app">
   <div class="app-toolbar">
     <div class="app-title">Zinc Octopus</div>
+    <div class="app-tray">
+      <zo-button theme="accent" routerLink="/help">Help?!</zo-button>
+      <zo-button theme="accent" (click)="logOut()">Log out</zo-button>
+    </div>
   </div>
   <div class="app-content">
     <router-outlet></router-outlet>

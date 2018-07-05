@@ -18,6 +18,7 @@ import { BoardComponent } from './components/board/board.component';
 import { AngularFireModule } from 'angularfire2';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 import { environment } from '../environments/environment';
+import { ButtonComponent } from './components/button/button.component';
 
 const reducers: ActionReducerMap<AppStateModel> = {
   players: playerReducer,
@@ -31,7 +32,8 @@ const reducers: ActionReducerMap<AppStateModel> = {
     AppComponent,
     GameViewComponent,
     TransferComponent,
-    BoardComponent
+    BoardComponent,
+    ButtonComponent
   ],
   imports: [
     BrowserModule,

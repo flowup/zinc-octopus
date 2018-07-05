@@ -29,6 +29,8 @@ abstract class HeavyAction<T> extends LightAction {
 
 export class RequestLoginAction extends HeavyAction<LoginOptionsModel> { }
 export class ConfirmLoginAction extends LightAction { }
+export class RequestLogoutAction extends LightAction { }
+export class ConfirmLogoutAction extends LightAction { }
 export class InitializeAction extends HeavyAction<PlayerModel> { }
 export class UpsertPlayersAction extends HeavyAction<PlayerModel[]> { }
 export class DeletePlayersAction extends HeavyAction<string[]> { }
@@ -42,4 +44,4 @@ export class SendTransferAction extends HeavyAction<TransferEventModel> { }
 export type PlayerActions = InitializeAction | UpsertPlayersAction | DeletePlayersAction;
 export type CellActions = InitializeAction | UpsertCellsAction | DeleteCellsAction;
 export type TransferActions = InitializeAction | UpsertTransfersAction | DeleteTransfersAction;
-export type MeActions = ConfirmLoginAction | InitializeAction;
+export type MeActions = ConfirmLoginAction | ConfirmLogoutAction | InitializeAction;
