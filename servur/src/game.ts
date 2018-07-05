@@ -13,6 +13,7 @@ export interface Cell {
 
 export enum GameEvents {
     Initialize = 'initialize',
+    Start = 'start',
 
     PlayersUpsert = 'game.players.upsert',
     PlayersDelete = 'game.players.delete',
@@ -88,6 +89,7 @@ export enum GameMode {
 
 export enum GameStatus {
     Initialized = 'initialized',
+    Started = 'started',
     Running = 'running',
     Ended = 'ended'
 }
@@ -97,7 +99,7 @@ export class Game {
     cells: Cell[] = []
     transfers: Transfer[] = []
 
-    status = GameStatus.Initialized
+    status = GameStatus.Started
 
     updater: NodeJS.Timer
 
@@ -107,7 +109,7 @@ export class Game {
         this.updater = setInterval(this.update.bind(this), 500)
     }
 
-    start() {
+    initialize() {
         console.log(`[Game][${this.id}] Starting new game:`, JSON.stringify(this.players))
         this.status = GameStatus.Running
 
@@ -124,11 +126,20 @@ export class Game {
 
             p.socket.emit(GameEvents.Initialize, {
                 id: p.id,
-                name: p.name
+                name: p.name,
+                startsAt: Math.round((new Date()).getTime() / 1000) + 5
             })
+
+            setTimeout(this.start.bind(this), 5000)
 
             p.socket.emit(GameEvents.PlayersUpsert, this.players)
             p.socket.emit(GameEvents.CellsUpsert, this.cells)
+        })
+    }
+
+    start() {
+        this.players.forEach(p => {
+            p.socket.emit(GameEvents.Start, {})
         })
     }
 
@@ -263,8 +274,8 @@ export class Game {
             return acc
         }, {})
 
-        // last player standing
-        if (Object.keys(stats).length <= 1) {
+        // last player standing and no transactions by other players
+        if (Object.keys(stats).length <= 1 && this.transfers.filter(x => x.owner).length <= 0) {
             return true
         }
 
