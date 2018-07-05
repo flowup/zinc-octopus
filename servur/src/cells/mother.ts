@@ -14,6 +14,12 @@ export class MotherCell extends Cell {
             return
         }
 
+        // if no owner was assigned, up by 1
+        if (!this.owner) {
+            this.weight += 1
+            return
+        }
+
         this.weight += 4
     }
 }

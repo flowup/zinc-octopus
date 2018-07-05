@@ -41,16 +41,23 @@ export interface Map {
 export const Maps: (() => Map)[] = [
     () => ({
         name: 'Gold Airedale',
-        numberOfPlayers: 2,
+        numberOfPlayers: 4,
         playerCells: [
             new MotherCell(uuid(), 100, 0.1, 0.1, ''),
-            new MotherCell(uuid(), 100, 0.9, 0.9, '')
+            new MotherCell(uuid(), 100, 0.9, 0.9, ''),
+            new MotherCell(uuid(), 100, 0.1, 0.9, ''),
+            new MotherCell(uuid(), 100, 0.9, 0.1, ''),
         ],
         neutralCells: [
             // left top
             new NormalCell(uuid(), 50, 0.35, 0.1),
             new NormalCell(uuid(), 50, 0.1, 0.35),
             new NormalCell(uuid(), 75, 0.35, 0.35),
+
+            // left bottom
+            new NormalCell(uuid(), 50, 0.1, 0.65),
+            new NormalCell(uuid(), 50, 0.35, 0.9),
+            new NormalCell(uuid(), 75, 0.35, 0.65),
 
             // center
             new NormalCell(uuid(), 90, 0.5, 0.5),
@@ -59,6 +66,11 @@ export const Maps: (() => Map)[] = [
             new NormalCell(uuid(), 50, 0.65, 0.9),
             new NormalCell(uuid(), 50, 0.9, 0.65),
             new NormalCell(uuid(), 75, 0.65, 0.65),
+
+            // right top
+            new NormalCell(uuid(), 50, 0.65, 0.1),
+            new NormalCell(uuid(), 50, 0.9, 0.35),
+            new NormalCell(uuid(), 75, 0.65, 0.35),
         ],
         boostCells: []
     })
@@ -82,7 +94,7 @@ export enum GameStatus {
 }
 
 export class Game {
-    id: string = uuid()
+    id: string
     cells: Cell[]
     transfers: Transfer[] = []
 
@@ -103,10 +115,13 @@ export class Game {
     updater: NodeJS.Timer
 
     constructor(private teams: Team[]) {
-        this.cells = this.generateMap()
+        this.id = uuid()
+        console.log(`[Game][${this.id}] Initializing new game`)
 
         // save references to all players for quick broadcast
         this._players = this.teams.reduce((acc, team) => acc.concat(team.players), [])
+
+        this.cells = this.generateMap()
     }
 
     initialize() {
@@ -126,9 +141,9 @@ export class Game {
 
             p.socket.emit(GameEvents.Initialize, {
                 id: p.id,
-                team: this.teams.find(t => t.players.indexOf(p) !== -1).id,
+                team: p.team.id,
                 name: p.name,
-                startsAt: Math.round((new Date()).getTime() / 1000) + 5
+                startsAt: Date.now() + 5000
             })
 
             p.socket.emit(GameEvents.TeamsUpsert, this.teams)
@@ -237,10 +252,15 @@ export class Game {
 
             const attacker = this._players.find(p => p.id === t.owner)
             const deffender = this._players.find(p => p.id === defense.owner)
+
+            if (!attacker && !deffender) { // neutral -> neutral
+                defense.weight += t.weight
+            } else if (attacker && deffender && attacker.team === deffender.team) { // team player -> team player
+                defense.weight += t.weight
+            } else { // other
+                defense.weight -= t.weight
+            }
             
-            // attack or add more resources if send from the same player
-            defense.weight = attacker.team === deffender.team ? defense.weight + t.weight : defense.weight - t.weight
-             
             // convert the node if it was taken
             if (defense.weight < 0) {
                 defense.weight = Math.abs(defense.weight)
@@ -278,7 +298,9 @@ export class Game {
         const stats = this.cells.reduce((acc, c) => {
             if (!c.owner) return acc
 
-            acc[c.owner] = (acc[c.owner] || 0) + 1
+            const p = this._players.find(p => p.id == c.owner)
+
+            acc[p.team.id] = (acc[p.team.id] || 0) + 1
             return acc
         }, {})
 

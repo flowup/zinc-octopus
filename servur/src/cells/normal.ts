@@ -14,6 +14,11 @@ export class NormalCell extends Cell {
             return
         }
 
+        if (!this.owner) {
+            this.weight += Math.random() < 0.1 ? 1 : 0
+            return
+        }
+
         if (this.weight > 50 && this.weight < 150) {
             this.weight += 3
         } else {
