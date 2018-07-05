@@ -17,6 +17,7 @@ import { $meId } from '../../reducers/me.reducer';
 export class TransferComponent implements OnDestroy {
   transferX: Observable<number>;
   transferY: Observable<number>;
+  transferWeight: number;
   transferClass: 'transfer-mine' | 'transfer-theirs' | 'transfer-neutral';
   private cellSub: Subscription;
 
@@ -31,6 +32,7 @@ export class TransferComponent implements OnDestroy {
   @Input()
   set transfer(transfer: TransferModel) {
     this.ngOnDestroy();
+    this.transferWeight = transfer.weight;
     this.cellSub = this.store
       .select((state): [CellModel[], string] => [
         $cellsByIds(transfer.from, transfer.to)(state),
