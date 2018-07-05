@@ -1,10 +1,11 @@
-import { ConfirmLoginAction, ConfirmLogoutAction, EndAction, InitializeAction, MeActions } from '../misc/actions';
+import { ConfirmLoginAction, ConfirmLogoutAction, EndAction, InitializeAction, MeActions, StartAction } from '../misc/actions';
 import { AppStateModel } from '../models/app-state.model';
 import { MeModel, MeStatus } from '../models/me.model';
 
 const INITIAL_STATE: MeModel = {
   status: MeStatus.LoggedOut,
-  id: null
+  id: null,
+  team: null
 };
 
 export function meReducer(state: MeModel = INITIAL_STATE, action: MeActions): MeModel {
@@ -21,8 +22,16 @@ export function meReducer(state: MeModel = INITIAL_STATE, action: MeActions): Me
     case InitializeAction.type:
       return {
         ...state,
-        status: MeStatus.Playing,
-        id: (action as InitializeAction).payload.id
+        status: MeStatus.Ready,
+        id: (action as InitializeAction).payload.id,
+        team: (action as InitializeAction).payload.team,
+        playingFrom: (action as InitializeAction).payload.startsAt
+      };
+
+    case StartAction.type:
+      return {
+        ...state,
+        status: MeStatus.Playing
       };
 
     case EndAction.type:
@@ -38,5 +47,5 @@ export function meReducer(state: MeModel = INITIAL_STATE, action: MeActions): Me
   }
 }
 
-export const $meId = ({me}: AppStateModel) => me.id;
 export const $meStatus = ({me}: AppStateModel) => me.status;
+export const $mePlayingFrom = ({me}: AppStateModel) => me.playingFrom;

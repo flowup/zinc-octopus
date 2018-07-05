@@ -11,11 +11,13 @@
   </div>
 
   <div *ngFor="let cell of theirCells$ | async; trackBy: identifyCell"
-       class="board-cell board-cell-theirs"
+       class="board-cell"
        [style.left.%]="cell.x * 100"
        [style.top.%]="cell.y * 100"
        [ngClass]="{'board-cell-clickable': selectedCell,
-                   'board-cell-mother': cell.type === CellType.Mother}"
+                   'board-cell-mother': cell.type === CellType.Mother,
+                   'board-cell-friendly': cell.friendly,
+                   'board-cell-enemy': !cell.friendly}"
        (click)="sendTransfer(cell, 'theirs')">
     <div class="board-cell-label">{{cell.weight}}</div>
   </div>
@@ -30,8 +32,8 @@
     <div class="board-cell-label">{{cell.weight}}</div>
   </div>
 
-  <zo-transfer
-    *ngFor="let transfer of transfers$ | async; trackBy: identifyTransfer"
-    [transfer]="transfer">
-  </zo-transfer>
+  <zo-transfer-animation
+    *ngFor="let transfer of transferAnimations$ | async; trackBy: identifyTransfer"
+    [transferAnimation]="transfer">
+  </zo-transfer-animation>
 </div>

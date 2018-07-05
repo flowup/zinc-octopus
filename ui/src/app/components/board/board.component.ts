@@ -2,11 +2,11 @@ import { Component } from '@angular/core';
 import { Observable } from 'rxjs/index';
 import { AppStateModel } from '../../models/app-state.model';
 import { Store } from '@ngrx/store';
-import { TransferModel } from '../../models/transfer.model';
 import { CellModel, CellType } from '../../models/cell.model';
 import { $myCells, $neutralCells, $theirCells } from '../../reducers/cell.reducer';
-import { $transfers } from '../../reducers/transfer.reducer';
+import { $transferAnimations } from '../../reducers/transfer.reducer';
 import { SendTransferAction } from '../../misc/actions';
+import { TransferAnimationModel } from '../../models/transfer-animation.model';
 
 @Component({
   selector: 'zo-board',
@@ -21,16 +21,16 @@ export class BoardComponent {
   readonly myCells$: Observable<CellModel[]>;
   readonly theirCells$: Observable<CellModel[]>;
   readonly neutralCells$: Observable<CellModel[]>;
-  readonly transfers$: Observable<TransferModel[]>;
+  readonly transferAnimations$: Observable<TransferAnimationModel[]>;
 
   identifyCell = (_, cell: CellModel) => cell.id;
-  identifyTransfer = (_, transfer: TransferModel) => transfer.id;
+  identifyTransfer = (_, {transferId}: TransferAnimationModel) => transferId;
 
   constructor(private readonly store: Store<AppStateModel>) {
     this.myCells$ = this.store.select($myCells);
     this.theirCells$ = this.store.select($theirCells);
     this.neutralCells$ = this.store.select($neutralCells);
-    this.transfers$ = this.store.select($transfers);
+    this.transferAnimations$ = this.store.select($transferAnimations);
   }
 
   sendTransfer(cell: CellModel, whose: 'mine' | 'theirs' | 'neutral'): void {

@@ -1,0 +1,9 @@
+<div class="transfer"
+     [ngClass]="{'transfer-neutral': transferOwner === TransferOwner.None,
+                 'transfer-mine': transferOwner === TransferOwner.Me,
+                 'transfer-friendly': transferOwner === TransferOwner.Friend,
+                 'transfer-enemy': transferOwner === TransferOwner.Enemy}"
+     [style.left.%]="(transferX | async) * 100"
+     [style.top.%]="(transferY | async) * 100">
+  <div class="transfer-label">{{transferWeight}}</div>
+</div>

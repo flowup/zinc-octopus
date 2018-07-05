@@ -10,4 +10,5 @@ export interface CellModel {
   x: number;
   y: number;
   type: CellType;
+  friendly?: boolean;
 }

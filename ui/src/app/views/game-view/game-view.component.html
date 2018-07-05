@@ -9,11 +9,14 @@
   <ng-container *ngIf="(meStatus$ | async) === MeStatus.LoggedIn">
     <div class="game-status-hint">
       Waiting in queue
-      <span class="game-status-hint-ellipsis">
-        <span>.</span>
-        <span>.</span>
-        <span>.</span>
-      </span>
+      <zo-ellipsis-loader></zo-ellipsis-loader>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="(meStatus$ | async) === MeStatus.Ready">
+    <div class="game-status-hint">
+      Game starts in {{startIn$ | async}}
+      <zo-ellipsis-loader></zo-ellipsis-loader>
     </div>
   </ng-container>
 

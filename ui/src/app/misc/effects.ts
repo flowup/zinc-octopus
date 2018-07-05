@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Effect } from '@ngrx/effects';
 import { Observable, of } from 'rxjs/index';
-import { map, switchMap, take, tap } from 'rxjs/internal/operators';
+import { map, switchMap, tap } from 'rxjs/internal/operators';
 import * as io from 'socket.io-client';
 import { Actions } from '@ngrx/effects';
 import { environment } from '../../environments/environment';
@@ -10,28 +10,22 @@ import { CellModel } from '../models/cell.model';
 import { TransferModel } from '../models/transfer.model';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { auth } from 'firebase';
-import { Action } from '@ngrx/store';
 import {
-  DeleteCellsAction,
-  DeletePlayersAction,
-  DeleteTransfersAction,
-  InitializeAction,
-  RequestLoginAction,
-  SendTransferAction,
-  UpsertCellsAction,
-  UpsertPlayersAction,
-  UpsertTransfersAction,
-  ConfirmLoginAction,
-  RequestJoinAction, RequestLogoutAction, ConfirmLogoutAction, EndAction,
+  DeleteCellsAction, DeleteTeamsAction, DeleteTransfersAction, InitializeAction, RequestLoginAction, SendTransferAction,
+  UpsertCellsAction, UpsertTeamsAction, UpsertTransfersAction, ConfirmLoginAction, RequestJoinAction, RequestLogoutAction,
+  ConfirmLogoutAction, EndAction, StartAction
 } from './actions';
 import { GameEndModel } from '../models/game-end.model';
+import { TeamModel } from '../models/team.model';
+import { GameScheduleModel } from '../models/game-schedule.model';
 
 const enum SocketEvent {
   // incoming
   Initialize = 'initialize',
+  Start = 'start',
   End = 'end',
-  UpsertPlayers = 'game.players.upsert',
-  DeletePlayers = 'game.players.delete',
+  UpsertTeams = 'game.teams.upsert',
+  DeleteTeams = 'game.teams.delete',
   UpsertCells = 'game.cells.upsert',
   DeleteCells = 'game.cells.delete',
   UpsertTransfers = 'game.transfers.upsert',
@@ -44,17 +38,20 @@ const enum SocketEvent {
 
 @Injectable()
 export class Effects {
-  @Effect() initialize$ = this.observeEvent<PlayerModel>(SocketEvent.Initialize)
+  @Effect() initialize$ = this.observeEvent<PlayerModel & GameScheduleModel>(SocketEvent.Initialize)
     .pipe(map(me => new InitializeAction(me)));
+
+  @Effect() start$ = this.observeEvent<PlayerModel>(SocketEvent.Start)
+    .pipe(map(() => new StartAction()));
 
   @Effect() end$ = this.observeEvent<GameEndModel>(SocketEvent.End)
     .pipe(map(gameEnd => new EndAction(gameEnd)));
 
-  @Effect() upsertPlayers$ = this.observeEvent<PlayerModel[]>(SocketEvent.UpsertPlayers)
-    .pipe(map(players => new UpsertPlayersAction(players)));
+  @Effect() upsertTeams$ = this.observeEvent<TeamModel[]>(SocketEvent.UpsertTeams)
+    .pipe(map(teams => new UpsertTeamsAction(teams)));
 
-  @Effect() deletePlayers$ = this.observeEvent<string[]>(SocketEvent.DeletePlayers)
-    .pipe(map(players => new DeletePlayersAction(players)));
+  @Effect() deleteTeams$ = this.observeEvent<string[]>(SocketEvent.DeleteTeams)
+    .pipe(map(teams => new DeleteTeamsAction(teams)));
 
   @Effect() upsertCells$ = this.observeEvent<CellModel[]>(SocketEvent.UpsertCells)
     .pipe(map(cells => new UpsertCellsAction(cells)));

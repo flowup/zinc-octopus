@@ -22,11 +22,12 @@ export function cellReducer(state: IdMap<CellModel> = {}, action: CellActions): 
 export const $myCells = ({cells, me}: AppStateModel) => Object.values(cells)
   .filter(cell => cell.owner === me.id);
 
-export const $theirCells = ({cells, me}: AppStateModel) => Object.values(cells)
-  .filter(cell => cell.owner != null && cell.owner !== me.id);
+export const $theirCells = ({cells, teams, me}: AppStateModel) => Object.values(cells)
+  .filter(cell => cell.owner != null && cell.owner !== me.id)
+  .map(cell => ({
+    ...cell,
+    friendly: teams[me.team].players.some(player => player.id === cell.owner)
+  }));
 
 export const $neutralCells = ({cells}: AppStateModel) => Object.values(cells)
   .filter(cell => cell.owner == null);
-
-export const $cellsByIds = (...cellIds: string[]) => ({cells}: AppStateModel) => cellIds
-  .map(id => cells[id] || null);

@@ -11,17 +11,18 @@ import { transferReducer } from './reducers/transfer.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { Effects } from './misc/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { playerReducer } from './reducers/player.reducer';
-import { TransferComponent } from './components/transfer/transfer.component';
+import { teamReducer } from './reducers/team.reducer';
+import { TransferAnimationComponent } from './components/transfer-animation/transfer-animation.component';
 import { meReducer } from './reducers/me.reducer';
 import { BoardComponent } from './components/board/board.component';
 import { AngularFireModule } from 'angularfire2';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 import { environment } from '../environments/environment';
 import { ButtonComponent } from './components/button/button.component';
+import { EllipsisLoaderComponent } from './components/ellipsis-loader/ellipsis-loader.component';
 
 const reducers: ActionReducerMap<AppStateModel> = {
-  players: playerReducer,
+  teams: teamReducer,
   cells: cellReducer,
   transfers: transferReducer,
   me: meReducer,
@@ -31,9 +32,10 @@ const reducers: ActionReducerMap<AppStateModel> = {
   declarations: [
     AppComponent,
     GameViewComponent,
-    TransferComponent,
+    TransferAnimationComponent,
     BoardComponent,
-    ButtonComponent
+    ButtonComponent,
+    EllipsisLoaderComponent
   ],
   imports: [
     BrowserModule,

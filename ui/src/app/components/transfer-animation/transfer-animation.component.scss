@@ -14,16 +14,20 @@ $transfer-size: 16px;
   justify-content: center;
   align-items: center;
 
+  &.transfer-neutral {
+    background-color: $theme-color-2;
+  }
+
   &.transfer-mine {
     background-color: $theme-color-5;
   }
 
-  &.transfer-theirs {
-    background-color: $theme-color-4;
+  &.transfer-friendly {
+    background-color: $theme-color-6;
   }
 
-  &.transfer-neutral {
-    background-color: $theme-color-2;
+  &.transfer-enemy {
+    background-color: $theme-color-4;
   }
 }
 

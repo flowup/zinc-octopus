@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TransferComponent } from './transfer.component';
+import { EllipsisLoaderComponent } from './ellipsis-loader.component';
 
-describe('TransferComponent', () => {
-  let component: TransferComponent;
-  let fixture: ComponentFixture<TransferComponent>;
+describe('EllipsisLoaderComponent', () => {
+  let component: EllipsisLoaderComponent;
+  let fixture: ComponentFixture<EllipsisLoaderComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TransferComponent ]
+      declarations: [ EllipsisLoaderComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TransferComponent);
+    fixture = TestBed.createComponent(EllipsisLoaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

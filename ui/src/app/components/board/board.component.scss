@@ -25,7 +25,11 @@ $cell-size: 50px;
     background-color: $theme-color-5;
   }
 
-  &.board-cell-theirs {
+  &.board-cell-friendly {
+    background-color: $theme-color-6;
+  }
+
+  &.board-cell-enemy {
     background-color: $theme-color-4;
   }
 
