@@ -33,6 +33,11 @@ $cell-size: 50px;
     background-color: $theme-color-2;
   }
 
+  &.board-cell-mother {
+    border-style: double;
+    border-width: 5px;
+  }
+
   &.board-cell-clickable {
     cursor: pointer;
     box-shadow: 0 0 15px rgba(black, 0.5);

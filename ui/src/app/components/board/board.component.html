@@ -3,7 +3,9 @@
        class="board-cell board-cell-mine"
        [style.left.%]="cell.x * 100"
        [style.top.%]="cell.y * 100"
-       [ngClass]="{'board-cell-clickable': cell.id !== selectedCell, 'board-cell-selected': cell.id === selectedCell}"
+       [ngClass]="{'board-cell-clickable': cell.id !== selectedCell,
+                   'board-cell-selected': cell.id === selectedCell,
+                   'board-cell-mother': cell.type === CellType.Mother}"
        (click)="sendTransfer(cell, 'mine')">
     <div class="board-cell-label">{{cell.weight}}</div>
   </div>
@@ -12,7 +14,8 @@
        class="board-cell board-cell-theirs"
        [style.left.%]="cell.x * 100"
        [style.top.%]="cell.y * 100"
-       [ngClass]="{'board-cell-clickable': selectedCell}"
+       [ngClass]="{'board-cell-clickable': selectedCell,
+                   'board-cell-mother': cell.type === CellType.Mother}"
        (click)="sendTransfer(cell, 'theirs')">
     <div class="board-cell-label">{{cell.weight}}</div>
   </div>
@@ -21,7 +24,8 @@
        class="board-cell board-cell-neutral"
        [style.left.%]="cell.x * 100"
        [style.top.%]="cell.y * 100"
-       [ngClass]="{'board-cell-clickable': selectedCell}"
+       [ngClass]="{'board-cell-clickable': selectedCell,
+                   'board-cell-mother': cell.type === CellType.Mother}"
        (click)="sendTransfer(cell, 'neutral')">
     <div class="board-cell-label">{{cell.weight}}</div>
   </div>
