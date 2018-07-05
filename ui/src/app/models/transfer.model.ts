@@ -5,4 +5,5 @@ export interface TransferModel {
   start: number;
   end: number;
   owner: string;
+  weight: number;
 }

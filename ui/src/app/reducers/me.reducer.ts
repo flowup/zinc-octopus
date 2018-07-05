@@ -1,4 +1,4 @@
-import { ConfirmLoginAction, InitializeAction, MeActions } from '../misc/actions';
+import { ConfirmLoginAction, ConfirmLogoutAction, EndAction, InitializeAction, MeActions } from '../misc/actions';
 import { AppStateModel } from '../models/app-state.model';
 import { MeModel, MeStatus } from '../models/me.model';
 
@@ -15,11 +15,22 @@ export function meReducer(state: MeModel = INITIAL_STATE, action: MeActions): Me
         status: MeStatus.LoggedIn
       };
 
+    case ConfirmLogoutAction.type:
+      return INITIAL_STATE;
+
     case InitializeAction.type:
       return {
         ...state,
         status: MeStatus.Playing,
         id: (action as InitializeAction).payload.id
+      };
+
+    case EndAction.type:
+      return {
+        ...state,
+        status: (action as EndAction).payload.winner === state.id ?
+          MeStatus.Winner :
+          MeStatus.Loser
       };
 
     default:

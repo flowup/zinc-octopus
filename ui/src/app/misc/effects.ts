@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Effect } from '@ngrx/effects';
-import { Observable } from 'rxjs/index';
+import { Observable, of } from 'rxjs/index';
 import { map, switchMap, take, tap } from 'rxjs/internal/operators';
 import * as io from 'socket.io-client';
 import { Actions } from '@ngrx/effects';
@@ -22,8 +22,9 @@ import {
   UpsertPlayersAction,
   UpsertTransfersAction,
   ConfirmLoginAction,
-  RequestJoinAction,
+  RequestJoinAction, RequestLogoutAction, ConfirmLogoutAction, EndAction,
 } from './actions';
+import { GameEndModel } from '../models/game-end.model';
 
 const enum SocketEvent {
   // incoming
@@ -46,6 +47,9 @@ export class Effects {
   @Effect() initialize$ = this.observeEvent<PlayerModel>(SocketEvent.Initialize)
     .pipe(map(me => new InitializeAction(me)));
 
+  @Effect() end$ = this.observeEvent<GameEndModel>(SocketEvent.End)
+    .pipe(map(gameEnd => new EndAction(gameEnd)));
+
   @Effect() upsertPlayers$ = this.observeEvent<PlayerModel[]>(SocketEvent.UpsertPlayers)
     .pipe(map(players => new UpsertPlayersAction(players)));
 
@@ -64,22 +68,25 @@ export class Effects {
   @Effect() deleteTransfers$ = this.observeEvent<string[]>(SocketEvent.DeleteTransfers)
     .pipe(map(transfers => new DeleteTransfersAction(transfers)));
 
-  @Effect() logIn$ = this.actions$
+  @Effect({dispatch: false}) requestLogIn$ = this.actions$
     .ofType(RequestLoginAction.type)
     .pipe(
-      switchMap(({payload}: RequestLoginAction) => new Observable<Action>(subscriber => {
-        const signIn = payload.anonymous ?
-          this.afAuth.auth.signInAnonymously() :
-          this.afAuth.auth.signInWithPopup(new auth.GoogleAuthProvider());
-        signIn.then(() => {
-          this.afAuth.idToken
-            .pipe(take(1))
-            .subscribe(idToken => {
-              subscriber.next(new ConfirmLoginAction());
-              subscriber.next(new RequestJoinAction({idToken}));
-            });
-        });
-      }))
+      tap(({payload}: RequestLoginAction) => payload.anonymous ?
+        this.afAuth.auth.signInAnonymously() :
+        this.afAuth.auth.signInWithPopup(new auth.GoogleAuthProvider())
+      )
+    );
+
+  @Effect({dispatch: false}) requestLogOut$ = this.actions$
+    .ofType(RequestLogoutAction.type)
+    .pipe(tap(() => this.afAuth.auth.signOut()));
+
+  @Effect() observeToken$ = this.afAuth.idToken
+    .pipe(
+      switchMap(idToken => idToken != null ?
+        of(new ConfirmLoginAction(), new RequestJoinAction({idToken})) :
+        of(new ConfirmLogoutAction())
+      )
     );
 
   @Effect({dispatch: false}) join$ = this.actions$

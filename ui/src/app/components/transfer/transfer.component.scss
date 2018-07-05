@@ -9,6 +9,10 @@ $transfer-size: 16px;
   border: 1px solid $theme-color-1;
   border-radius: 50%;
   transform: translate(#{-$transfer-size / 2}, #{-$transfer-size / 2});
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   &.transfer-mine {
     background-color: $theme-color-5;
@@ -21,4 +25,8 @@ $transfer-size: 16px;
   &.transfer-neutral {
     background-color: $theme-color-2;
   }
+}
+
+.transfer-label {
+  font-size: 10px;
 }

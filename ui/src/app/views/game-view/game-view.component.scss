@@ -19,19 +19,8 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-}
 
-.game-login-button {
-  padding: 10px 15px;
-  border: 1px solid $theme-color-1;
-  border-radius: 10px;
-  background-color: $theme-color-4;
-  color: $theme-color-1;
-  font-size: 20px;
-  cursor: pointer;
-  outline: none;
-
-  &:not(:last-child) {
+  > *:not(:last-child) {
     margin-bottom: 20px;
   }
 }
@@ -52,4 +41,10 @@
     &:nth-child(2) { animation-delay: 400ms }
     &:nth-child(3) { animation-delay: 600ms }
   }
+}
+
+.game-board-header {
+  font-size: 30px;
+  height: 40px;
+  text-align: center;
 }

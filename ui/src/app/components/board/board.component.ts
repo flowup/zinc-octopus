@@ -3,7 +3,7 @@ import { Observable } from 'rxjs/index';
 import { AppStateModel } from '../../models/app-state.model';
 import { Store } from '@ngrx/store';
 import { TransferModel } from '../../models/transfer.model';
-import { CellModel } from '../../models/cell.model';
+import { CellModel, CellType } from '../../models/cell.model';
 import { $myCells, $neutralCells, $theirCells } from '../../reducers/cell.reducer';
 import { $transfers } from '../../reducers/transfer.reducer';
 import { SendTransferAction } from '../../misc/actions';
@@ -14,6 +14,8 @@ import { SendTransferAction } from '../../misc/actions';
   styleUrls: ['./board.component.scss']
 })
 export class BoardComponent {
+  readonly CellType = CellType;
+
   selectedCell: string | null = null;
 
   readonly myCells$: Observable<CellModel[]>;

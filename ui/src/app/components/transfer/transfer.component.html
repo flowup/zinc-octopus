@@ -1,5 +1,6 @@
 <div class="transfer"
-     [ngClass]="this.transferClass"
+     [ngClass]="transferClass"
      [style.left.%]="(transferX | async) * 100"
      [style.top.%]="(transferY | async) * 100">
+  <div class="transfer-label">{{transferWeight}}</div>
 </div>
