@@ -37,3 +37,8 @@ export class Player {
   
     }
 }
+
+export interface Team {
+    id: string
+    players: Player[]
+}

@@ -1,11 +1,10 @@
 import { Server, Socket } from 'socket.io'
 import { auth } from 'firebase-admin'
 
-import * as uuid from 'uuid/v4'
 import * as faker from 'faker'
 
 import { Matchmaker } from './matchmaker';
-import { Player, PlayerEvent } from './player';
+import { Player, PlayerEvent, Team } from './player';
 import { Game } from './game';
 import { Players } from './player_store';
 
@@ -60,8 +59,8 @@ export class Lobby {
         }
     }
 
-    handleMatchFound(players) {
-        const game = new Game(players)
+    handleMatchFound(teams: Team[]) {
+        const game = new Game(teams)
         game.initialize()
     }
 }

@@ -1,4 +1,4 @@
-import { Player, PlayerEvent, TransferPayload } from "./player";
+import { Player, PlayerEvent, TransferPayload, Team } from "./player";
 import * as uuid from 'uuid/v4'
 import { firestore } from "firebase-admin";
 
@@ -22,8 +22,8 @@ export enum GameEvents {
     Initialize = 'initialize',
     Start = 'start',
 
-    PlayersUpsert = 'game.players.upsert',
-    PlayersDelete = 'game.players.delete',
+    TeamsUpsert = 'game.teams.upsert',
+    TeamsDelete = 'game.teams.delete',
 
     CellsUpsert = 'game.cells.upsert',
     CellsDelete = 'game.cells.delete',
@@ -111,6 +111,8 @@ export class Game {
     cells: Cell[] = []
     transfers: Transfer[] = []
 
+    _players: Player[]
+
     _status = GameStatus.Uninitialized
 
     set status(s: GameStatus) {
@@ -125,14 +127,17 @@ export class Game {
 
     updater: NodeJS.Timer
 
-    constructor(private players: Player[]) {
+    constructor(private teams: Team[]) {
         this.cells = this.generateMap()
+
+        // save references to all players for quick broadcast
+        this._players = this.teams.reduce((acc, team) => acc.concat(team.players), [])
     }
 
     initialize() {
-        console.log(`[Game][${this.id}] Starting new game:`, JSON.stringify(this.players))
+        console.log(`[Game][${this.id}] Starting new game:`, JSON.stringify(this._players))
 
-        this.players.forEach(p => {
+        this._players.forEach(p => {
             p.socket.on(PlayerEvent.Transfer, (payload: TransferPayload) => {
                 console.log(`[Game][${this.id}] Creating new transfer by player: `, p.name, payload)
                 this.handleTransfer(payload, p)
@@ -149,7 +154,7 @@ export class Game {
                 startsAt: Math.round((new Date()).getTime() / 1000) + 5
             })
 
-            p.socket.emit(GameEvents.PlayersUpsert, this.players)
+            p.socket.emit(GameEvents.TeamsUpsert, this.teams)
             p.socket.emit(GameEvents.CellsUpsert, this.cells)
         })
 
@@ -158,7 +163,7 @@ export class Game {
     }
 
     start() {
-        this.players.forEach(p => {
+        this._players.forEach(p => {
             p.socket.emit(GameEvents.Start, {})
         })
 
@@ -211,10 +216,10 @@ export class Game {
     }
 
     handleDisconnect(player: Player): boolean {
-        this.players = this.players.filter(p => p !== player)
+        this._players.filter(p => p !== player)
 
-        if (this.players.length < 2 && this.players.length > 0) {
-            this.end(this.players[0].id)
+        if (this._players.length < 2 && this._players.length > 0) {
+            this.end(this._players[0].id)
         }
 
         return true
@@ -226,11 +231,11 @@ export class Game {
             return
         }
 
-        console.log(`[Game][${this.id}] Ending game for all:`, JSON.stringify(this.players))
+        console.log(`[Game][${this.id}] Ending game for all:`, JSON.stringify(this._players))
         this.status = GameStatus.Ended
 
         // TODO: calculate winner - everybody is a winner now :partyparrot:
-        for (const p of this.players) {
+        for (const p of this._players) {
             p.socket.emit(PlayerEvent.End, {
                 winner,
             })
@@ -271,7 +276,7 @@ export class Game {
             doneTransfers.push(t.id)
         }
 
-        for (const p of this.players) {
+        for (const p of this._players) {
             p.socket.emit(GameEvents.TransfersUpsert, this.transfers)
             p.socket.emit(GameEvents.CellsUpsert, this.cells)
 
@@ -281,7 +286,7 @@ export class Game {
         }
 
         if (this.calculateEndingCondition()) {
-            for (const p of this.players) {
+            for (const p of this._players) {
                 p.socket.emit(GameEvents.TransfersDelete, this.transfers.reduce((acc, t) => {
                     acc.push(t.id)
                     return acc
@@ -311,7 +316,7 @@ export class Game {
 
     updateFirestoreStatistics() {
         const stats = {
-            players: this.players.reduce((acc, p) => {
+            players: this._players.reduce((acc, p) => {
                 acc.push(p.id)
                 return acc
             },[]),
@@ -362,7 +367,7 @@ export class Game {
         const instance = Maps[0]()
 
         for (let i = 0; i < instance.numberOfPlayers; i++) {
-            instance.playerCells[i].owner = this.players[i].id
+            instance.playerCells[i].owner = this._players[i].id
         }
 
         return instance.neutralCells.concat(instance.playerCells)
