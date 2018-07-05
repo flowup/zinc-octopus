@@ -1,5 +1,7 @@
+import * as uuid from 'uuid/v4'
 import { EventEmitter } from 'events'
-import { Player } from './player';
+
+import { Player, Team } from './player';
 import { GameMode } from './game';
 
 export class Matchmaker extends EventEmitter {
@@ -15,7 +17,16 @@ export class Matchmaker extends EventEmitter {
         const oponent = this.queue.shift()
 
         console.log('[Matchmaker] matched:', JSON.stringify([player, oponent]))
-        this.emit('match', [player, oponent])
+        this.emit('match', [
+            <Team>{
+                id: uuid(),
+                players: [player]
+            },
+            <Team>{
+                id: uuid(),
+                players: [oponent]
+            }
+        ])
     }
 
     dequeue(player: Player) {

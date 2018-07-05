@@ -1,22 +1,7 @@
 import { Player, PlayerEvent, TransferPayload, Team } from "./player";
 import * as uuid from 'uuid/v4'
 import { firestore } from "firebase-admin";
-
-export enum CellType {
-    Normal = 'normal',
-    Mother = 'mother',
-    Challenge = 'challenge'
-}
-
-export interface Cell {
-    id: string
-    owner?: string
-    weight: number
-    type: CellType
-
-    x: number
-    y: number
-}
+import { MotherCell, NormalCell, ChallengeCell, Cell } from "./cells";
 
 export enum GameEvents {
     Initialize = 'initialize',
@@ -48,9 +33,9 @@ export interface Map {
     name: string
     numberOfPlayers: number,
 
-    playerCells: Cell[]
-    neutralCells: Cell[]
-    boostCells: Cell[]
+    playerCells: MotherCell[]
+    neutralCells: NormalCell[]
+    boostCells: ChallengeCell[]
 }
 
 export const Maps: (() => Map)[] = [
@@ -58,33 +43,23 @@ export const Maps: (() => Map)[] = [
         name: 'Gold Airedale',
         numberOfPlayers: 2,
         playerCells: [
-            { id: uuid(), x: 0.1, y: 0.1, weight: 100, type: CellType.Mother },
-            { id: uuid(), x: 0.9, y: 0.9, weight: 100, type: CellType.Mother },
+            new MotherCell(uuid(), 100, 0.1, 0.1, ''),
+            new MotherCell(uuid(), 100, 0.9, 0.9, '')
         ],
         neutralCells: [
             // left top
-            { id: uuid(), x: 0.35, y: 0.1, weight: 50, type: CellType.Normal },
-            { id: uuid(), x: 0.35, y: 0.35, weight: 75, type: CellType.Normal },
-            { id: uuid(), x: 0.1, y: 0.35, weight: 50, type: CellType.Normal },
+            new NormalCell(uuid(), 50, 0.35, 0.1),
+            new NormalCell(uuid(), 50, 0.1, 0.35),
+            new NormalCell(uuid(), 75, 0.35, 0.35),
 
             // center
-            { id: uuid(), x: 0.5, y: 0.5, weight: 50, type: CellType.Normal },
+            new NormalCell(uuid(), 90, 0.5, 0.5),
 
             // right bottom
-            { id: uuid(), x: 0.65, y: 0.65, weight: 75, type: CellType.Normal },
-            { id: uuid(), x: 0.9, y: 0.65, weight: 50, type: CellType.Normal },
-            { id: uuid(), x: 0.65, y: 0.9, weight: 50, type: CellType.Normal },
+            new NormalCell(uuid(), 50, 0.65, 0.9),
+            new NormalCell(uuid(), 50, 0.9, 0.65),
+            new NormalCell(uuid(), 75, 0.65, 0.65),
         ],
-        boostCells: []
-    }),
-    () => ({
-        name: 'The Arena',
-        numberOfPlayers: 2,
-        playerCells: [
-            { id: uuid(), x: 0.03, y: 0.2, weight: 100, type: CellType.Mother },
-            { id: uuid(), x: 0.98, y: 0.95, weight: 100, type: CellType.Mother },
-        ],
-        neutralCells: [],
         boostCells: []
     })
 ]
@@ -108,7 +83,7 @@ export enum GameStatus {
 
 export class Game {
     id: string = uuid()
-    cells: Cell[] = []
+    cells: Cell[]
     transfers: Transfer[] = []
 
     _players: Player[]
@@ -249,8 +224,7 @@ export class Game {
 
     update() {
         for (const c of this.cells) {
-            if (c.owner) this.updateOwnerCell(c)
-            else this.updateNeutralCell(c)
+            c.update()
         }
 
         const doneTransfers = []
@@ -327,40 +301,6 @@ export class Game {
         firestore().collection('matches').add(stats)
 
         return stats
-    }
-
-    updateOwnerCell(c: Cell) {
-        if (c.weight > 200) {
-            c.weight -= Math.floor(c.weight * 0.01)
-            return
-        }
-
-        switch (c.type) {
-            case CellType.Normal:
-             if (c.weight > 150) {
-                c.weight += 2
-            } else if (c.weight > 50) {
-                c.weight += 3
-            } else {
-                c.weight += 2
-            }
-            break
-
-            case CellType.Mother:
-            c.weight += 4
-            break
-        }
-    }
-
-    updateNeutralCell(c: Cell) {
-        if (c.weight > 100) {
-            this.handleTransfer({
-                from: c.id,
-                to: this.cells[Math.floor(Math.random()*this.cells.length)].id,
-            }, null)
-        } else if(Math.random() < 0.3) {
-            c.weight += 1
-        }
     }
 
     private generateMap(): Cell[] {

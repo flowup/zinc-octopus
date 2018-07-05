@@ -6,7 +6,6 @@ import * as faker from 'faker'
 import { Matchmaker } from './matchmaker';
 import { Player, PlayerEvent, Team } from './player';
 import { Game } from './game';
-import { Players } from './player_store';
 
 export interface PlayerJoinPayload {
     idToken: string
@@ -28,11 +27,9 @@ export class Lobby {
 
     handleConnection(socket: Socket) {
         const player = new Player(socket)
-        Players.add(player)
 
         player.socket.on(PlayerEvent.Join, this.handlePlayerJoined.bind(this, player))
         player.socket.on('disconnect', () => {
-            Players.remove(player)
             this.matchmaker.dequeue(player)
         })
     }
