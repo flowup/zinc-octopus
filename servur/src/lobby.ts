@@ -62,6 +62,6 @@ export class Lobby {
 
     handleMatchFound(players) {
         const game = new Game(players)
-        game.start()
+        game.initialize()
     }
 }

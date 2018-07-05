@@ -88,6 +88,7 @@ export enum GameMode {
 }
 
 export enum GameStatus {
+    Uninitialized = 'uninitialized',
     Initialized = 'initialized',
     Started = 'started',
     Running = 'running',
@@ -99,19 +100,26 @@ export class Game {
     cells: Cell[] = []
     transfers: Transfer[] = []
 
-    status = GameStatus.Started
+    _status = GameStatus.Uninitialized
+
+    set status(s: GameStatus) {
+        this._status = s
+
+        console.log(`[Game][${this.id}] Changed status to:`, this._status)
+    }
+
+    get status(): GameStatus {
+        return this._status
+    }
 
     updater: NodeJS.Timer
 
     constructor(private players: Player[]) {
         this.cells = this.generateMap()
-
-        this.updater = setInterval(this.update.bind(this), 500)
     }
 
     initialize() {
         console.log(`[Game][${this.id}] Starting new game:`, JSON.stringify(this.players))
-        this.status = GameStatus.Running
 
         this.players.forEach(p => {
             p.socket.on(PlayerEvent.Transfer, (payload: TransferPayload) => {
@@ -130,20 +138,28 @@ export class Game {
                 startsAt: Math.round((new Date()).getTime() / 1000) + 5
             })
 
-            setTimeout(this.start.bind(this), 5000)
-
             p.socket.emit(GameEvents.PlayersUpsert, this.players)
             p.socket.emit(GameEvents.CellsUpsert, this.cells)
         })
+
+        setTimeout(this.start.bind(this), 5000)
+        this.status = GameStatus.Initialized
     }
 
     start() {
         this.players.forEach(p => {
             p.socket.emit(GameEvents.Start, {})
         })
+
+        this.updater = setInterval(this.update.bind(this), 500)
+        this.status = GameStatus.Running
     }
 
     handleTransfer(t: TransferPayload, player: Player): boolean {
+        if (this.status !== GameStatus.Running) {
+            return false
+        }
+
         const from = this.cells.find(c => c.id == t.from)
         const to = this.cells.find(c => c.id == t.to)
 
