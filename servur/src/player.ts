@@ -15,8 +15,8 @@ export interface TransferPayload {
 }
 
 export class Player {
-    id: string
-    name: string
+    id: string = 'unknown'
+    name: string = 'unknown'
   
     constructor(public socket: Socket) {
     }

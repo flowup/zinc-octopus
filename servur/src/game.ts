@@ -2,10 +2,17 @@ import { Player, PlayerEvent, TransferPayload } from "./player";
 import * as uuid from 'uuid/v4'
 import { firestore } from "firebase-admin";
 
+export enum CellType {
+    Normal = 'normal',
+    Mother = 'mother',
+    Challenge = 'challenge'
+}
+
 export interface Cell {
     id: string
     owner?: string
     weight: number
+    type: CellType
 
     x: number
     y: number
@@ -40,8 +47,10 @@ export interface Transfer {
 export interface Map {
     name: string
     numberOfPlayers: number,
+
     playerCells: Cell[]
     neutralCells: Cell[]
+    boostCells: Cell[]
 }
 
 export const Maps: (() => Map)[] = [
@@ -49,32 +58,34 @@ export const Maps: (() => Map)[] = [
         name: 'Gold Airedale',
         numberOfPlayers: 2,
         playerCells: [
-            { id: uuid(), x: 0.1, y: 0.1, weight: 100, owner: 'squid' },
-            { id: uuid(), x: 0.9, y: 0.9, weight: 100, owner: 'octopus' },
+            { id: uuid(), x: 0.1, y: 0.1, weight: 100, type: CellType.Mother },
+            { id: uuid(), x: 0.9, y: 0.9, weight: 100, type: CellType.Mother },
         ],
         neutralCells: [
             // left top
-            { id: uuid(), x: 0.35, y: 0.1, weight: 50 },
-            { id: uuid(), x: 0.35, y: 0.35, weight: 50 },
-            { id: uuid(), x: 0.1, y: 0.35, weight: 75 },
+            { id: uuid(), x: 0.35, y: 0.1, weight: 50, type: CellType.Normal },
+            { id: uuid(), x: 0.35, y: 0.35, weight: 75, type: CellType.Normal },
+            { id: uuid(), x: 0.1, y: 0.35, weight: 50, type: CellType.Normal },
 
             // center
-            { id: uuid(), x: 0.5, y: 0.5, weight: 50 },
+            { id: uuid(), x: 0.5, y: 0.5, weight: 50, type: CellType.Normal },
 
             // right bottom
-            { id: uuid(), x: 0.65, y: 0.65, weight: 75 },
-            { id: uuid(), x: 0.9, y: 0.65, weight: 50 },
-            { id: uuid(), x: 0.65, y: 0.9, weight: 50 },
-        ]
+            { id: uuid(), x: 0.65, y: 0.65, weight: 75, type: CellType.Normal },
+            { id: uuid(), x: 0.9, y: 0.65, weight: 50, type: CellType.Normal },
+            { id: uuid(), x: 0.65, y: 0.9, weight: 50, type: CellType.Normal },
+        ],
+        boostCells: []
     }),
     () => ({
         name: 'The Arena',
         numberOfPlayers: 2,
         playerCells: [
-            { id: uuid(), x: 0.03, y: 0.2, weight: 100 },
-            { id: uuid(), x: 0.98, y: 0.95, weight: 100 },
+            { id: uuid(), x: 0.03, y: 0.2, weight: 100, type: CellType.Mother },
+            { id: uuid(), x: 0.98, y: 0.95, weight: 100, type: CellType.Mother },
         ],
-        neutralCells: []
+        neutralCells: [],
+        boostCells: []
     })
 ]
 
@@ -282,7 +293,7 @@ export class Game {
         }
     }
 
-    calculateEndingCondition() {
+    calculateEndingCondition(): boolean {
         const stats = this.cells.reduce((acc, c) => {
             if (!c.owner) return acc
 
@@ -316,12 +327,23 @@ export class Game {
     updateOwnerCell(c: Cell) {
         if (c.weight > 200) {
             c.weight -= Math.floor(c.weight * 0.01)
-        } else if (c.weight > 150) {
-            c.weight += 2
-        } else if (c.weight > 50) {
-            c.weight += 3
-        } else {
-            c.weight += 2
+            return
+        }
+
+        switch (c.type) {
+            case CellType.Normal:
+             if (c.weight > 150) {
+                c.weight += 2
+            } else if (c.weight > 50) {
+                c.weight += 3
+            } else {
+                c.weight += 2
+            }
+            break
+
+            case CellType.Mother:
+            c.weight += 4
+            break
         }
     }
 
