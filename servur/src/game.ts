@@ -114,8 +114,9 @@ export class Game {
 
         this._players.forEach(p => {
             p.socket.on(PlayerEvent.Transfer, (payload: TransferPayload) => {
-                console.log(`[Game][${this.id}] Creating new transfer by player: `, p.name, payload)
-                this.handleTransfer(payload, p)
+                if(this.handleTransfer(payload, p)) {
+                    console.log(`[Game][${this.id}] Creating new transfer by player: `, p.name, payload)
+                }
             })
 
             p.socket.on('disconnect', () => {
@@ -125,6 +126,7 @@ export class Game {
 
             p.socket.emit(GameEvents.Initialize, {
                 id: p.id,
+                team: this.teams.find(t => t.players.indexOf(p) !== -1).id,
                 name: p.name,
                 startsAt: Math.round((new Date()).getTime() / 1000) + 5
             })
@@ -181,7 +183,7 @@ export class Game {
             owner: from.owner,
             weight: transferWeight,
             start: start,
-            end:  start + time * 1000
+            end: start + time * 1000
         })
 
         // decrease the weight of the cell we sent from.
@@ -233,11 +235,11 @@ export class Game {
 
             const defense = this.cells.find(c => c.id === t.to)
 
-            const attacker = t.owner
-            const deffender = defense.owner
+            const attacker = this._players.find(p => p.id === t.owner)
+            const deffender = this._players.find(p => p.id === defense.owner)
             
             // attack or add more resources if send from the same player
-            defense.weight = attacker === deffender ? defense.weight + t.weight : defense.weight - t.weight
+            defense.weight = attacker.team === deffender.team ? defense.weight + t.weight : defense.weight - t.weight
              
             // convert the node if it was taken
             if (defense.weight < 0) {

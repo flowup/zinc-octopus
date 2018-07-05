@@ -17,6 +17,7 @@ export interface TransferPayload {
 export class Player {
     id: string = 'unknown'
     name: string = 'unknown'
+    team: Team
   
     constructor(public socket: Socket) {
     }
@@ -24,6 +25,7 @@ export class Player {
     toJSON() {
         return {
             id: this.id,
+            team: this.team && this.team.id || 'unknown',
             name: this.name,
             authenticated: this.authenticated,
         }

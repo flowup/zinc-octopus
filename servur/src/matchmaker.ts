@@ -6,9 +6,10 @@ import { GameMode } from './game';
 
 export class Matchmaker extends EventEmitter {
     queue: Player[] = []
+    queue2v2: Player[] = []
 
     enqueue(player: Player, mode: GameMode = GameMode.Normal) {
-        console.log(`[Matchmaker][${mode}] enqueue:`, JSON.stringify(player))
+        console.log(`[Matchmaker][${mode}] enqueue 1v1:`, JSON.stringify(player))
         if (this.queue.length <= 0) {
             this.queue.push(player)
             return
@@ -16,21 +17,49 @@ export class Matchmaker extends EventEmitter {
 
         const oponent = this.queue.shift()
 
-        console.log('[Matchmaker] matched:', JSON.stringify([player, oponent]))
         this.emit('match', [
-            <Team>{
+            this.attachToTeam(player, null),
+            this.attachToTeam(oponent, null)
+        ])
+        console.log('[Matchmaker] matched 1v1:', JSON.stringify([player, oponent]))
+    }
+
+    enqueue2v2(player: Player, mode: GameMode = GameMode.Normal) {
+        console.log(`[Matchmaker][${mode}] enqueue 2v2:`, JSON.stringify(player))
+        if (this.queue2v2.length < 3) {
+            return this.queue2v2.push(player)
+        }
+
+        const alphaPlayers = [this.queue2v2.shift(), this.queue2v2.shift()]
+        const betaPlayers = [this.queue2v2.shift(), player]
+
+        const alpha = alphaPlayers.reduce((team, p) => this.attachToTeam(p, team), <Team>null)
+        const beta = betaPlayers.reduce((team, p) => this.attachToTeam(p, team), <Team>null)
+
+        console.log('[Matchmaker] matched 2v2:', JSON.stringify([alpha, beta]))
+        return this.emit('match', [
+            alpha, beta
+        ])
+    }
+
+    attachToTeam(player: Player, team: Team): Team {
+        if (!team) {
+            const team = {
                 id: uuid(),
                 players: [player]
-            },
-            <Team>{
-                id: uuid(),
-                players: [oponent]
             }
-        ])
+            player.team = team
+            return team
+        } else {
+            team.players.push(player)
+            player.team = team
+            return team
+        }
     }
 
     dequeue(player: Player) {
         console.log('[Matchmaker] dequeue:', JSON.stringify(player))
         this.queue = this.queue.filter((p: Player) => p !== player)
+        this.queue2v2 = this.queue2v2.filter((p: Player) => p !== player)
     }
 }

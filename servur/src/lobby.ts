@@ -50,7 +50,7 @@ export class Lobby {
 
             // tell client we accepted him
             player.socket.emit(LobbyEvents.PlayerEnqueued, player)
-            return this.matchmaker.enqueue(player)
+            return this.matchmaker.enqueue2v2(player)
         } catch (err) {
             return player.socket.emit('status', 'Your id token is invalid: ' + err)
         }
